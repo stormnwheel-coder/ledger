@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-YnNmrW5WvSgO3YtT4k6x9O8mW281sNQ5t8Pas9CtwlE='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-nWrVKW9QbCswvmwSTlMpTi8JojJKl5Ed/J94CCpmMx4='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -374,7 +374,7 @@ const RE_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const RE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const FIELDS = {
   file: ["version", "sample", "_note", "heads", "statements", "expenses", "payslips"],
-  head: ["id", "name", "code", "kind", "total", "validTill", "usedFor"],
+  head: ["id", "name", "code", "kind", "total", "validTill", "usedFor", "closed"],
   statement: ["head", "asOn", "balance", "source"],
   expense: ["id", "head", "date", "item", "purpose", "paidBy", "inr", "foreign", "claimed", "reimbursed", "charged"],
   foreign: ["currency", "amount", "rate"],
@@ -409,6 +409,7 @@ function problems(d) {
     if (!optText(h.code) || !optText(h.usedFor)) bad.push(`${at}: code and usedFor must be text`);
     if (h.total != null && (!num(h.total) || h.kind !== "finite")) bad.push(`${at}: total must be a number, on a finite head`);
     if (!optDate(h.validTill)) bad.push(`${at}: validTill must be a date`);
+    if (h.closed != null && typeof h.closed !== "boolean") bad.push(`${at}: closed must be true or false`);
     kinds.set(h.id, h.kind);
   });
 
@@ -552,9 +553,13 @@ const net = p => gross(p) - sum(p.deductions, x => x.amount);
 const ofKind = (p, k) => sum(p.deductions.filter(x => x.kind === k), x => x.amount);
 const creditGap = p => (p.credited ? Math.round(p.credited.amount - net(p)) : null);
 
+/* A closed head (closed: true) is one no longer in use. Its entries stay in
+   the history and still count in "owed to you", but the summaries list only
+   the open heads, in `active`. `heads` keeps every head, for the ledgers. */
 function buildModel(d, today) {
   const fy0 = fyStart(today);
   const heads = d.heads.map(h => (h.kind === "finite" ? finiteHead(h, d, today) : openHead(h, d, today)));
+  const active = heads.filter(x => !x.h.closed);
   const headName = Object.fromEntries(d.heads.map(h => [h.id, h.name]));
 
   const mine = d.expenses.filter(e => e.paidBy === "me" && !e.reimbursed);
@@ -565,7 +570,7 @@ function buildModel(d, today) {
   const fySlips = slips.filter(p => p.month >= fy0.slice(0, 7));
   const short = fySlips.filter(p => p.credited && creditGap(p) !== 0);
 
-  return { d, today, fy0, heads, headName, mine, claimed, unclaimed, slips, fySlips, short,
+  return { d, today, fy0, heads, active, headName, mine, claimed, unclaimed, slips, fySlips, short,
     latest: slips.at(-1) || null };
 }
 
@@ -1035,8 +1040,8 @@ function stageChips(exps, chosen, act, k = "") {
  * ------------------------------------------------------------------ */
 function statusView() {
   const owed = sum(M.mine, rupees), cl = sum(M.claimed, rupees), un = sum(M.unclaimed, rupees);
-  const finite = M.heads.filter(x => x.h.kind === "finite");
-  const open = M.heads.filter(x => x.h.kind === "open");
+  const finite = M.active.filter(x => x.h.kind === "finite");
+  const open = M.active.filter(x => x.h.kind === "open");
   const p = M.latest;
 
   const cards = finite.map(f => `
