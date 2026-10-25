@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-szxCh+yJcvoFi1M9AXVpYHHhbvXw10Ea3O3vNJjn+jg='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } [hidden] { display: none !important; }</style>
+</head>
+<body>
+<title>Budgets &amp; pay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
+<style>
+/* A pocket passbook: one column, the summary first, and every head opens
+   into its own ruled ledger. Cool paper, ink-blue accent, status colours
+   kept for state alone and always paired with an icon and words. */
+:root {
+  --bg: #f2f4f7;
+  --card: #ffffff;
+  --ink: #101720;
+  --ink-2: #4a5462;
+  --muted: #7a8494;
+  --rule: #e3e6eb;
+  --rule-2: #c9cfd8;
+  --accent: #2a78d6;
+  --accent-soft: #d6e5f8;
+  --accent-ink: #ffffff;
+  --chip: #e6eaf0;
+  --good: #0ca30c;
+  --warn: #fab219;
+  --crit: #d03b3b;
+  --warn-soft: #fbe9c4;
+  --crit-soft: #f6d6d6;
+  --ribbon: #fbe3e3;
+  --ribbon-ink: #a52a2a;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --r: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0f12; --card: #171a1f; --ink: #eef1f5; --ink-2: #b6bdc8; --muted: #868e9b;
+    --rule: #252a31; --rule-2: #353b45; --accent: #3987e5; --accent-soft: #1b2b42; --accent-ink: #ffffff;
+    --chip: #222830; --warn-soft: #3a2e10; --crit-soft: #3d1c1c; --ribbon: #3a1a1a; --ribbon-ink: #f2a3a3;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d0f12; --card: #171a1f; --ink: #eef1f5; --ink-2: #b6bdc8; --muted: #868e9b;
+  --rule: #252a31; --rule-2: #353b45; --accent: #3987e5; --accent-soft: #1b2b42; --accent-ink: #ffffff;
+  --chip: #222830; --warn-soft: #3a2e10; --crit-soft: #3d1c1c; --ribbon: #3a1a1a; --ribbon-ink: #f2a3a3;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.42 var(--font); }
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.ribbon { background: var(--ribbon); color: var(--ribbon-ink); font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
+.ribbon .wrap { padding-block: 6px; text-align: center; }
+
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 6px; }
+.brand { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.stamp { margin: 1px 0 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.iconbtn { background: none; border: 0; padding: 8px; margin: -8px; color: var(--ink-2); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.iconbtn svg { width: 18px; height: 18px; }
+
+main.wrap { padding-block: 4px calc(92px + env(safe-area-inset-bottom, 0px)); }
+.view { display: flex; flex-direction: column; gap: 10px; }
+
+h1.title { margin: 2px 0 0; font-size: 26px; line-height: 1.15; font-weight: 750; letter-spacing: -.02em; text-wrap: balance; }
+h1.title small { font-size: 16px; font-weight: 500; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
+.lede { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+.back { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 600; font-size: 14px; padding: 6px 0 2px; align-self: flex-start; }
+.sec { margin: 14px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+.sec span { font-weight: 600; letter-spacing: .03em; text-transform: none; font-size: 12px; }
+
+.ic { width: 13px; height: 13px; flex: none; }
+.chev { width: 7px; height: 12px; color: var(--muted); flex: none; }
+
+/* Owed to you: the one hero figure. */
+.hero { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 12px; background: var(--card); border-radius: var(--r); padding: 14px 16px 15px; }
+.hero .eyebrow { grid-column: 1; font-size: 13px; color: var(--ink-2); }
+.hero .big { grid-column: 1; font-size: 38px; font-weight: 750; letter-spacing: -.03em; line-height: 1.1; }
+.hero .sub { grid-column: 1; font-size: 12.5px; color: var(--ink-2); }
+.hero .chev { grid-column: 2; grid-row: 1 / span 3; }
+
+/* Grouped lists: one surface per group, hairlines between rows. */
+.list { background: var(--card); border-radius: var(--r); overflow: hidden; }
+.list > * + * { border-top: 1px solid var(--rule); }
+.rowlink { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; align-items: center; padding: 12px 14px 12px 16px; }
+.rowlink > .body { min-width: 0; }
+.line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.name { font-weight: 620; font-size: 15.5px; }
+.name small { font-weight: 450; color: var(--ink-2); font-size: 13px; margin-left: 4px; }
+.amt { font-weight: 680; font-size: 16px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.meta { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cnt { font-size: 12.5px; color: var(--ink-2); font-weight: 400; margin-right: 8px; }
+
+.meter { height: 6px; border-radius: 3px; margin-top: 7px; overflow: hidden; background: var(--accent-soft); }
+.meter i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+.meter.warn { background: var(--warn-soft); } .meter.warn i { background: var(--warn); }
+.meter.crit { background: var(--crit-soft); } .meter.crit i { background: var(--crit); }
+
+.flag { font-size: 12.5px; margin-top: 5px; display: flex; gap: 7px; align-items: flex-start; color: var(--ink); }
+.flag .ic { margin-top: 2.5px; }
+.flag > span { flex: 1; min-width: 0; }
+.flag.dim { color: var(--ink-2); }
+
+/* The working behind "available now". */
+.calc { background: var(--card); border-radius: var(--r); padding: 12px 16px 13px; }
+.calc .l { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding: 2.5px 0; font-variant-numeric: tabular-nums; }
+.calc .l > span:first-child { min-width: 0; }
+.calc .minus { color: var(--ink-2); }
+.calc .total { border-top: 1px solid var(--rule-2); margin-top: 5px; padding-top: 7px; font-weight: 720; font-size: 16px; }
+.calc .sh { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding-top: 8px; }
+.calc .sh:first-child { padding-top: 0; }
+.note { font-size: 12px; color: var(--ink-2); margin: 0; }
+.panel { background: var(--card); border-radius: var(--r); padding: 12px 16px 13px; }
+
+/* Ledger rows. */
+.ledger { background: var(--card); border-radius: var(--r); padding: 2px 16px 4px; }
+.mon { font-size: 12px; font-weight: 700; color: var(--muted); padding: 12px 0 5px; border-bottom: 1px solid var(--rule-2); letter-spacing: .02em; }
+.tx { padding: 10px 0 11px; }
+.tx + .tx { border-top: 1px solid var(--rule); }
+.tx .item { font-size: 15px; font-weight: 520; min-width: 0; }
+.tx .amt { font-size: 15px; font-weight: 640; }
+.sub { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; }
+.sub .ic { display: inline-block; vertical-align: -2px; margin: 0 4px 0 1px; color: var(--ink-2); }
+.sub.purpose { color: var(--ink); }
+.stmt { background: var(--bg); border-radius: 12px; padding: 9px 12px 10px; margin: 8px -4px; }
+.stmt .item { font-weight: 600; }
+.empty { color: var(--ink-2); font-size: 13.5px; padding: 14px 0; text-align: center; }
+
+/* Filters. */
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; margin: 0 -2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 0; background: var(--chip); color: var(--ink); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 560; cursor: pointer; white-space: nowrap; }
+.chip b { font-weight: 500; color: var(--ink-2); margin-left: 4px; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+.chip[aria-pressed="true"] b { color: var(--card); opacity: .75; }
+.search { width: 100%; border: 1px solid var(--rule-2); background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 15px; }
+.search::placeholder { color: var(--muted); }
+.tally { font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; }
+.tally b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* Tiles and bars. */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--card); border-radius: var(--r); padding: 11px 14px 12px; min-width: 0; }
+.tile .k { display: block; font-size: 12.5px; color: var(--ink-2); }
+.tile .v { display: block; font-size: 21px; font-weight: 720; letter-spacing: -.015em; }
+.tile.wide { grid-column: 1 / -1; }
+.bar + .bar { margin-top: 10px; }
+.bar .lab { font-size: 13.5px; min-width: 0; }
+.bar .amt { font-size: 14px; }
+.bar .track { height: 8px; margin-top: 5px; }
+.bar .track i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 3px; }
+
+/* Salary table. */
+.tablebox { background: var(--card); border-radius: var(--r); padding: 6px 12px 8px; overflow-x: auto; }
+table.sal { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.sal th { font-size: 11.5px; color: var(--muted); font-weight: 650; text-align: right; padding: 8px 0 6px 8px; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
+.sal td { text-align: right; padding: 9px 0 9px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.sal th:first-child, .sal td:first-child { text-align: left; padding-left: 2px; }
+.sal tbody tr { cursor: pointer; }
+.sal tbody tr[aria-selected="true"] td { background: var(--accent-soft); }
+.sal tbody tr[aria-selected="true"] td:first-child { border-radius: 8px 0 0 8px; }
+.sal tbody tr[aria-selected="true"] td:last-child { border-radius: 0 8px 8px 0; }
+.sal tfoot td { font-weight: 720; border-bottom: 0; }
+.sal .bank { width: 1%; }
+.sal .bank .ic { vertical-align: -2px; }
+.sal .gap { font-size: 12px; margin-left: 3px; }
+
+.textlink { color: var(--accent); font-weight: 600; font-size: 14px; padding: 8px 0; align-self: flex-start; }
+.legend .flag { font-size: 13.5px; margin-top: 9px; }
+.prose p { margin: 0 0 10px; font-size: 14px; }
+.prose p:last-child { margin-bottom: 0; }
+
+/* Bottom tabs. */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--rule); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 5; }
+.tabs .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+.tabs a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 9px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.tabs a svg { width: 23px; height: 23px; }
+.tabs a[aria-current="page"] { color: var(--accent); }
+
+/* Lock screen. */
+.lock { min-height: 100%; display: flex; align-items: center; }
+.lock .wrap { width: 100%; padding-block: 48px; }
+.lockcard { background: var(--card); border-radius: 20px; padding: 26px 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.lockcard .glyph { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.lockcard .glyph svg { width: 22px; height: 22px; }
+.lockcard h1 { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: -.02em; }
+.lockcard p { margin: 0; color: var(--ink-2); font-size: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; }
+.pass { width: 100%; border: 1px solid var(--rule-2); background: var(--bg); border-radius: 12px; padding: 12px 14px; font-size: 16px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--ink-2); }
+.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.primary { border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 16px; padding: 13px 16px; cursor: pointer; }
+.primary[disabled] { opacity: .6; cursor: progress; }
+.msg { min-height: 1.4em; font-size: 13.5px; color: var(--ink); }
+.msg.err { color: var(--crit); font-weight: 600; }
+.hint { background: var(--ribbon); color: var(--ribbon-ink); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hint code { font: 600 14px ui-monospace, "SF Mono", Menlo, monospace; }
+.hint button { border: 0; background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 13px; cursor: pointer; flex: none; }
+.quiet { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 4px 0; cursor: pointer; align-self: flex-start; }
+
+/* Dropbox mode: the refresh button beside the stamp, and the notice row. */
+.refresh { background: none; border: 0; padding: 6px; margin: -6px -6px -6px -2px; color: var(--muted); cursor: pointer; display: inline-flex; }
+.refresh svg { width: 14px; height: 14px; }
+.refresh[aria-busy="true"] svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#notice:empty { display: none; }
+#notice .panel { margin-top: 6px; }
+#notice .quiet { display: inline; padding: 0; font-size: inherit; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .view { animation: rise .18s ease-out; }
+  @keyframes rise { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+</style>
+
+<section class="lock" id="lock" hidden>
+  <div class="wrap">
+    <form class="lockcard" id="lockForm" autocomplete="on">
+      <div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></div>
+      <h1>Budgets &amp; pay</h1>
+      <p>Your figures are locked. Enter your passphrase to open them; this phone can remember it so you only do this once.</p>
+      
+      <div class="field">
+        <label for="pass">Passphrase</label>
+        <input class="pass" id="pass" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      </div>
+      <label class="check"><input type="checkbox" id="remember" checked><span>Remember on this phone. Anyone who can unlock the phone can then open this page.</span></label>
+      <button class="primary" id="unlockBtn" type="submit">Unlock</button>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+<section class="lock" id="connect" hidden>
+  <div class="wrap">
+    <div class="lockcard">
+      <div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8.5 12 4l8.5 4.5L12 13z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3.5 13 12 17.5 20.5 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+      <h1>Budgets &amp; pay</h1>
+      <p id="cintro">Your figures stay in your Dropbox. Sign in once and this phone stays signed in. The app can only read its own folder in your Dropbox, and cannot change anything.</p>
+      <button class="primary" id="signInBtn" type="button">Sign in with Dropbox</button>
+      <button class="primary" id="againBtn" type="button" hidden>Check again</button>
+      <div class="msg" id="cmsg" role="status" aria-live="polite"></div>
+      <button class="quiet" id="signOutLink" type="button" hidden>Sign out of Dropbox on this phone</button>
+    </div>
+  </div>
+</section>
+
+<div id="app" hidden>
+  <div class="ribbon" id="ribbon" hidden><div class="wrap">Sample · every figure here is invented</div></div>
+  <header class="top">
+    <div class="wrap">
+      <div><p class="brand">Budgets &amp; pay</p><p class="stamp" id="stamp"></p></div>
+      <button class="iconbtn" id="lockBtn" type="button" aria-label="Lock, and forget the key on this phone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span id="lockLabel">Lock</span></button>
+    </div>
+  </header>
+  <div class="wrap" id="notice"></div>
+  <main class="wrap" id="view"></main>
+  <nav class="tabs" aria-label="Sections">
+    <div class="wrap">
+      <a href="#status" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="15.5" width="7" height="5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="11.5" width="7" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>Status</a>
+      <a href="#owed" data-tab="owed"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 8h6M9 10.6h6M9.6 8c3.6 0 3.6 5.2 0 5.2H9l5 4.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Owed</a>
+      <a href="#history" data-tab="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="4.6" cy="6.5" r="1.2" fill="currentColor"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor"/><circle cx="4.6" cy="17.5" r="1.2" fill="currentColor"/></svg>History</a>
+      <a href="#salary" data-tab="salary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h8l3.5 3.5v13.5h-11.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14.5 3.5V7H18M9.5 11.5h5.5M9.5 14.5h5.5M9.5 17.5h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Salary</a>
+    </div>
+  </nav>
+</div>
+
+<script type="application/json" id="source">{"kind":"dropbox","appKey":"48f76egnljmhzf5","file":"/budget.json","redirect":"https://stormnwheel-coder.github.io/ledger/","api":"https://api.dropboxapi.com","content":"https://content.dropboxapi.com","www":"https://www.dropbox.com"}</script>
+<script>
+"use strict";
+/* ===== model.mjs, pasted in by build-phone.mjs ===== */
+/*
+ * budgetTracker -- the rules.
+ *
+ * Every figure the app shows is worked out here, from the data file alone.
+ * Both views use this one file: render.mjs (the PDF) imports it, and
+ * build-phone.mjs pastes it into the phone app, so the two can never
+ * disagree about a balance. HANDOVER.md §2 states the rules in words.
+ *
+ * Keep it plain: no Node APIs and no browser APIs, only functions over the
+ * data. Every export is a "function" or "const" declaration at the start of
+ * a line, because build-phone.mjs strips the word "export" to inline it.
+ */
+
+/* ------------------------------------------------------------------ *
+ * Dates. Every date in the data is a "YYYY-MM-DD" string and is only
+ * ever compared as a string or converted through UTC, so no time zone
+ * can shift a day. "Today" comes from local time, never toISOString().
+ * ------------------------------------------------------------------ */
+const pad = n => String(n).padStart(2, "0");
+const localYmd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August",
+  "September", "October", "November", "December"];
+const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const parts = s => s.split("-").map(Number);
+const dayNo = s => { const [y, m, d] = parts(s); return Date.UTC(y, m - 1, d) / 864e5; };
+const daysBetween = (a, b) => dayNo(b) - dayNo(a);
+const dShort = s => { const [, m, d] = parts(s); return `${d} ${MON[m - 1]}`; };
+const dLong = s => { const [y, m, d] = parts(s); return `${d} ${MON[m - 1]} ${y}`; };
+const dFull = s => {
+  const [y, m, d] = parts(s);
+  return `${WEEKDAY[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${d} ${MONTH[m - 1]} ${y}`;
+};
+const monthName = ym => { const [y, m] = parts(ym); return `${MONTH[m - 1]} ${y}`; };
+/* The Indian financial year runs April to March. */
+const fyStart = s => { const [y, m] = parts(s); return `${m >= 4 ? y : y - 1}-04-01`; };
+const fyLabel = s => { const y = Number(fyStart(s).slice(0, 4)); return `${y}–${String(y + 1).slice(2)}`; };
+const days = n => (n === 1 ? "1 day" : `${n} days`);
+
+/* ------------------------------------------------------------------ *
+ * Money. Budgets are in rupees. An expense in another currency carries
+ * its foreign amount and a rate; its rupee figure is the one fixed for
+ * reimbursement, and until that is known it is estimated at the rate
+ * and shown with "≈".
+ * ------------------------------------------------------------------ */
+const IN0 = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+const IN2 = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const rs = n => (n < 0 ? "−₹" : "₹") + IN0.format(Math.abs(Math.round(n)));
+const bare = n => IN0.format(Math.round(n));
+const sum = (xs, f = x => x) => xs.reduce((a, x) => a + f(x), 0);
+
+const rupees = e => e.inr ?? Math.round(e.foreign.amount * e.foreign.rate);
+const estimated = e => e.inr == null;
+const approx = (n, est) => (est ? "≈ " : "") + rs(n);
+/* The date an expense reached the head's books: when you were reimbursed,
+   or when the institute charged it directly. Null while still on its way. */
+const chargedOn = e => (e.paidBy === "me" ? e.reimbursed : e.charged) || null;
+const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+/* Where an expense stands: settled (reimbursed or charged), waiting (claimed,
+   or booked by the institute and not yet charged) or toclaim (you paid and
+   have not claimed). */
+const stage = e => (e.paidBy === "me"
+  ? (e.reimbursed ? "settled" : e.claimed ? "waiting" : "toclaim")
+  : (e.charged ? "settled" : "waiting"));
+/* The same, in words, as [icon kind, text]. Icon kinds: good, wait, todo. */
+function standing(e, today) {
+  if (e.paidBy === "me") {
+    if (e.reimbursed) return ["good", `Reimbursed ${dShort(e.reimbursed)}`];
+    if (e.claimed) return ["wait", `Claimed ${dShort(e.claimed)}, waiting ${days(daysBetween(e.claimed, today))}`];
+    return ["todo", "Not claimed yet"];
+  }
+  return e.charged ? ["good", `Charged ${dShort(e.charged)}`] : ["wait", "Not charged yet"];
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+/* ------------------------------------------------------------------ *
+ * Checks. No view draws from a file it cannot trust.
+ * ------------------------------------------------------------------ */
+function validate(d) {
+  const bad = [];
+  const ids = new Set();
+  for (const h of d.heads) {
+    if (ids.has(h.id)) bad.push(`head id "${h.id}" used twice`);
+    ids.add(h.id);
+    if (h.kind !== "finite" && h.kind !== "open") bad.push(`head "${h.id}": kind must be finite or open`);
+  }
+  for (const s of d.statements) if (!ids.has(s.head)) bad.push(`statement ${s.asOn}: unknown head "${s.head}"`);
+  for (const e of d.expenses) {
+    if (!ids.has(e.head)) bad.push(`expense ${e.id}: unknown head "${e.head}"`);
+    if (e.inr == null && !e.foreign) bad.push(`expense ${e.id}: no rupee amount and no foreign amount`);
+    if (e.paidBy !== "me" && e.paidBy !== "institute") bad.push(`expense ${e.id}: paidBy must be me or institute`);
+  }
+  if (bad.length) throw new Error("data file has problems:\n  " + bad.join("\n  "));
+}
+
+/* ------------------------------------------------------------------ *
+ * The model: everything a view shows, computed once.
+ * ------------------------------------------------------------------ */
+function finiteHead(h, d, today) {
+  const sts = d.statements.filter(s => s.head === h.id).sort((a, b) => (a.asOn < b.asOn ? -1 : 1));
+  const exps = d.expenses.filter(e => e.head === h.id).sort(byDate);
+  const last = sts.at(-1) || null;
+
+  // Each statement is checked against the one before it, less what was charged in between.
+  const checks = sts.slice(1).map((s, i) => {
+    const prev = sts[i];
+    const between = exps.filter(e => { const c = chargedOn(e); return c && c > prev.asOn && c <= s.asOn; });
+    const expected = prev.balance - sum(between, rupees);
+    return { statement: s, prev, expected, gap: s.balance - expected };
+  });
+
+  // Available = the latest balance from accounts, less everything not yet in it.
+  const pending = exps.filter(e => { const c = chargedOn(e); return !(last && c && c <= last.asOn); });
+  const base = last ? last.balance : (h.total ?? 0);
+  const available = base - sum(pending, rupees);
+  const usedShare = h.total ? (h.total - available) / h.total : null;
+  const left = h.validTill ? daysBetween(today, h.validTill) : null;
+
+  const flags = [];
+  if (!last) flags.push(["warn", "No balance from accounts entered yet"]);
+  if (available < 0) flags.push(["crit", `Overspent by ${rs(-available)}`]);
+  else if (usedShare >= 0.8) flags.push(["warn", `Running low: ${Math.round(usedShare * 100)}% used`]);
+  if (left != null && left < 0) flags.push(["crit", `Ended ${dLong(h.validTill)}`]);
+  else if (left != null && left <= 90 && h.total && available / h.total > 0.25)
+    flags.push(["warn", `Ends in ${days(left)} with ${Math.round((available / h.total) * 100)}% unspent`]);
+  const lastCheck = checks.at(-1);
+  if (lastCheck && Math.round(lastCheck.gap) !== 0)
+    flags.push(["warn", `${dShort(lastCheck.statement.asOn)} statement ${rs(Math.abs(lastCheck.gap))} ${lastCheck.gap < 0 ? "below" : "above"} expected`]);
+
+  const state = available < 0 ? "crit" : usedShare >= 0.8 ? "warn" : "ok";
+  return { h, sts, exps, last, checks, pending, available, usedShare, left, flags, state,
+    est: pending.some(estimated) };
+}
+
+function openHead(h, d, today) {
+  const fy0 = fyStart(today);
+  const exps = d.expenses.filter(e => e.head === h.id).sort(byDate);
+  const fy = exps.filter(e => e.date >= fy0);
+  const byPurpose = new Map();
+  for (const e of fy) {
+    const k = e.purpose || "No purpose given";
+    const p = byPurpose.get(k) || { total: 0, est: false };
+    p.total += rupees(e);
+    p.est ||= estimated(e);
+    byPurpose.set(k, p);
+  }
+  const flags = [];
+  const missing = exps.filter(e => !e.purpose).length;
+  if (missing) flags.push(["warn", `${missing} expense${missing > 1 ? "s" : ""} with no purpose recorded`]);
+  return { h, exps, fy, total: sum(fy, rupees), est: fy.some(estimated), flags,
+    purposes: [...byPurpose].sort((a, b) => b[1].total - a[1].total) };
+}
+
+const gross = p => sum(p.earnings, x => x.amount);
+const net = p => gross(p) - sum(p.deductions, x => x.amount);
+const ofKind = (p, k) => sum(p.deductions.filter(x => x.kind === k), x => x.amount);
+const creditGap = p => (p.credited ? Math.round(p.credited.amount - net(p)) : null);
+
+function buildModel(d, today) {
+  const fy0 = fyStart(today);
+  const heads = d.heads.map(h => (h.kind === "finite" ? finiteHead(h, d, today) : openHead(h, d, today)));
+  const headName = Object.fromEntries(d.heads.map(h => [h.id, h.name]));
+
+  const mine = d.expenses.filter(e => e.paidBy === "me" && !e.reimbursed);
+  const claimed = mine.filter(e => e.claimed).sort((a, b) => (a.claimed < b.claimed ? -1 : 1));
+  const unclaimed = mine.filter(e => !e.claimed).sort(byDate);
+
+  const slips = [...d.payslips].sort((a, b) => (a.month < b.month ? -1 : 1));
+  const fySlips = slips.filter(p => p.month >= fy0.slice(0, 7));
+  const short = fySlips.filter(p => p.credited && creditGap(p) !== 0);
+
+  return { d, today, fy0, heads, headName, mine, claimed, unclaimed, slips, fySlips, short,
+    latest: slips.at(-1) || null };
+}
+
+/* ===== the app ===== */
+
+const SRC = JSON.parse(document.getElementById("source").textContent);
+const SEALED = SRC.kind === "sealed" ? SRC : null;
+const DBX = SRC.kind === "dropbox" ? SRC : null;
+const $ = s => document.querySelector(s);
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const TODAY = localYmd(new Date());
+
+const ICON = {
+  good: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#0ca30c"/><path d="M3.4 6.2 5.2 8l3.4-3.7" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  warn: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.2 11.3 10.6H.7Z" fill="#fab219" stroke="#fab219" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 4.6v2.6" stroke="#0b0b0b" stroke-width="1.3" stroke-linecap="round"/><circle cx="6" cy="9" r=".75" fill="#0b0b0b"/></svg>`,
+  crit: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#d03b3b"/><path d="M6 3v3.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="6" cy="8.8" r=".95" fill="#fff"/></svg>`,
+  wait: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.3V6l1.8 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  todo: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2.2 1.6"/></svg>`,
+};
+const CHEV = `<svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const REFRESH = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.4A5.4 5.4 0 1 0 13.4 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.6 2.6v3.9H9.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* Browser storage: one IndexedDB store of small records. Every call may
+   fail (private window, cleared data); callers then fall back to asking. */
+const STORE = { db: "budgetTracker", name: "keys" };
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(STORE.db, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE.name);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function kv(mode, fn) {
+  try {
+    const db = await idb();
+    return await new Promise(res => {
+      const req = fn(db.transaction(STORE.name, mode).objectStore(STORE.name));
+      req.onsuccess = () => res({ ok: true, v: req.result });
+      req.onerror = () => res({ ok: false });
+    });
+  } catch { return { ok: false }; }
+}
+const kvGet = async id => (await kv("readonly", s => s.get(id))).v ?? null;
+const kvPut = async (id, v) => (await kv("readwrite", s => s.put(v, id))).ok;
+const kvDel = async id => (await kv("readwrite", s => s.delete(id))).ok;
+
+/* ------------------------------------------------------------------ *
+ * Unlocking ("sealed" mode, the sample). The data is AES-256-GCM under a
+ * key derived from the passphrase (PBKDF2-SHA256). Once derived, the key
+ * -- never the passphrase -- can be kept in IndexedDB as a
+ * non-extractable CryptoKey, so the next visit opens without asking.
+ * ------------------------------------------------------------------ */
+const keyGet = () => kvGet("phone");
+const keyPut = v => kvPut("phone", v);
+const keyDel = () => kvDel("phone");
+
+async function deriveKey(pass) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass.normalize("NFC")), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(SEALED.salt), iterations: SEALED.iter, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+}
+async function unseal(key) {
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(SEALED.iv) }, key, b64(SEALED.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function showLock(message = "", isError = false) {
+  $("#app").hidden = true;
+  $("#lock").hidden = false;
+  const m = $("#msg");
+  m.textContent = message;
+  m.className = "msg" + (isError ? " err" : "");
+}
+
+async function startSealed() {
+  if (!window.crypto?.subtle) return showLock("This browser cannot open locked data here. Open the page over https.", true);
+  const saved = await keyGet();
+  if (saved && saved.salt === SEALED.salt) {
+    try { return show(await unseal(saved.key)); } catch { await keyDel(); }
+  }
+  showLock();
+}
+
+$("#lockForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = $("#unlockBtn");
+  btn.disabled = true;
+  showLock("Unlocking…");
+  let key, payload;
+  try {
+    key = await deriveKey($("#pass").value);
+    payload = await unseal(key);
+  } catch {
+    btn.disabled = false;
+    return showLock("That passphrase does not open this data. Check it and try again.", true);
+  }
+  let note = "";
+  if ($("#remember").checked && !(await keyPut({ salt: SEALED.salt, key })))
+    note = "This browser would not keep the key, so it will ask again next time.";
+  $("#pass").value = "";
+  btn.disabled = false;
+  show(payload, note);
+});
+
+$("#lockBtn").addEventListener("click", async () => {
+  if (DBX) return signOut();
+  await keyDel();
+  M = null;
+  $("#view").innerHTML = "";
+  showLock("Locked. The key is no longer kept on this phone.");
+});
+
+const fill = $("#fillHint");
+if (fill) fill.addEventListener("click", () => { $("#pass").value = fill.dataset.v; $("#pass").focus(); });
+
+/* ------------------------------------------------------------------ *
+ * Reading from Dropbox ("dropbox" mode, the real app). The page holds no
+ * figures. It signs in to Dropbox once (OAuth with PKCE, so no app secret
+ * is needed), keeps the refresh token in IndexedDB, and reads one file
+ * from the app's own Dropbox folder, the only place it is allowed to look,
+ * and only to read. The last good copy is kept too, so the app opens at
+ * once and works offline; every open checks Dropbox for a newer one.
+ * ------------------------------------------------------------------ */
+const PKCE = "budgetTracker-pkce";
+let auth = null, copy = null, problem = null, checking = false, signInNote = "";
+
+class DbxError extends Error {
+  // kind: "net" (no answer), "signedout", "missing" (no such file), "bad" (unreadable file)
+  constructor(kind, message) { super(message); this.kind = kind; }
+}
+const b64url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const hhmm = t => { const d = new Date(t); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const localStamp = iso => `${localYmd(new Date(iso))} ${hhmm(iso)}`;
+const when = t => `${localYmd(new Date(t)) === TODAY ? "today" : dLong(localYmd(new Date(t)))}, ${hhmm(t)}`;
+
+async function tokenCall(params) {
+  let r;
+  try { r = await fetch(DBX.api + "/oauth2/token", { method: "POST", body: new URLSearchParams({ client_id: DBX.appKey, ...params }) }); }
+  catch { throw new DbxError("net", "no connection"); }
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 400 || r.status === 401) throw new DbxError("signedout", j.error_description || j.error || `Dropbox answered ${r.status}`);
+  if (!r.ok || !j.access_token) throw new DbxError("net", `Dropbox answered ${r.status}`);
+  return j;
+}
+
+async function accessToken(force) {
+  if (!force && auth.access && auth.expiresAt > Date.now()) return auth.access;
+  const t = await tokenCall({ grant_type: "refresh_token", refresh_token: auth.refresh });
+  auth = { ...auth, access: t.access_token, expiresAt: Date.now() + (t.expires_in - 300) * 1000 };
+  await kvPut("dropbox", auth);
+  return auth.access;
+}
+
+async function dbx(host, path, init, retried = false) {
+  const token = await accessToken(retried);
+  let r;
+  try { r = await fetch(host + path, { method: "POST", ...init, headers: { Authorization: "Bearer " + token, ...init.headers } }); }
+  catch { throw new DbxError("net", "no connection"); }
+  if (r.status === 401 && !retried) return dbx(host, path, init, true);
+  if (r.status === 401) throw new DbxError("signedout", "Dropbox no longer accepts this phone's sign-in");
+  if (r.status === 409) {
+    const j = await r.json().catch(() => ({}));
+    throw new DbxError(/not_found/.test(j.error_summary || "") ? "missing" : "bad", j.error_summary || "Dropbox error");
+  }
+  if (!r.ok) throw new DbxError("net", `Dropbox answered ${r.status}`);
+  return r;
+}
+
+async function signIn() {
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(32)));
+  const challenge = b64url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
+  const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
+  try { localStorage.setItem(PKCE, JSON.stringify({ verifier, state })); }
+  catch { return showConnect("This browser is refusing storage, so it cannot stay signed in. Turn off private browsing and try again."); }
+  location.href = DBX.www + "/oauth2/authorize?" + new URLSearchParams({ client_id: DBX.appKey, response_type: "code",
+    token_access_type: "offline", code_challenge: challenge, code_challenge_method: "S256", redirect_uri: DBX.redirect, state });
+}
+
+/* Back from Dropbox's sign-in page with ?code= (or ?error=). */
+async function finishSignIn(q) {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(PKCE)); localStorage.removeItem(PKCE); } catch {}
+  history.replaceState(null, "", location.pathname + location.hash);
+  if (q.get("error")) return showConnect(`Dropbox did not sign you in (${q.get("error_description") || q.get("error")}).`), false;
+  if (!saved || saved.state !== q.get("state")) return showConnect("That sign-in did not match this page. Please try again."), false;
+  try {
+    const t = await tokenCall({ grant_type: "authorization_code", code: q.get("code"), code_verifier: saved.verifier, redirect_uri: DBX.redirect });
+    if (!t.refresh_token) throw new DbxError("signedout", "Dropbox gave no lasting sign-in");
+    auth = { refresh: t.refresh_token, access: t.access_token, expiresAt: Date.now() + (t.expires_in - 300) * 1000 };
+  } catch (e) { return showConnect(`Sign-in did not finish: ${e.message}.`), false; }
+  if (!(await kvPut("dropbox", auth))) signInNote = "This browser would not keep the sign-in, so it will ask again next time.";
+  return true;
+}
+
+async function signOut() {
+  if (auth) {
+    // Revoking the access token also cancels the refresh token behind it.
+    try { const token = await accessToken(); await fetch(DBX.api + "/2/auth/token/revoke", { method: "POST", headers: { Authorization: "Bearer " + token } }); } catch {}
+  }
+  auth = null; copy = null; problem = null; M = null;
+  await kvDel("dropbox");
+  await kvDel("copy");
+  $("#view").innerHTML = "";
+  $("#notice").innerHTML = "";
+  showConnect();
+  $("#cmsg").textContent = "Signed out. Nothing from your budget is kept on this phone now.";
+}
+
+/* Ask Dropbox whether the file has changed, and fetch it if so. */
+async function check() {
+  if (checking || !auth) return;
+  checking = true;
+  if (M) stamp(); else showConnect();
+  try {
+    const meta = await (await dbx(DBX.api, "/2/files/get_metadata",
+      { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: DBX.file }) })).json();
+    const changed = !copy || meta.rev !== copy.rev;
+    if (changed) {
+      const text = await (await dbx(DBX.content, "/2/files/download", { headers: { "Dropbox-API-Arg": JSON.stringify({ path: DBX.file }) } })).text();
+      let data;
+      try { data = JSON.parse(text); validate(data); } catch (e) { throw new DbxError("bad", e.message); }
+      copy = { data, rev: meta.rev, modified: meta.client_modified, checked: Date.now() };
+    } else copy = { ...copy, checked: Date.now() };
+    await kvPut("copy", copy);
+    problem = null;
+    checking = false;
+    if (changed || !M) show({ data: copy.data, publishedAt: localStamp(copy.modified) }, signInNote);
+    else { stamp(); notice(); }
+    signInNote = "";
+  } catch (e) {
+    checking = false;
+    problem = e instanceof DbxError ? e : new DbxError("bad", String(e?.message || e));
+    if (problem.kind === "signedout") { auth = null; await kvDel("dropbox"); }
+    if (M) { stamp(); notice(); } else showConnect();
+  }
+}
+
+function showConnect(message) {
+  $("#app").hidden = true;
+  $("#lock").hidden = true;
+  $("#connect").hidden = false;
+  $("#signInBtn").hidden = !!auth;
+  $("#againBtn").hidden = !auth;
+  $("#againBtn").disabled = checking;
+  $("#signOutLink").hidden = !auth;
+  const text = message || (checking ? "Checking Dropbox…" : !problem ? "" : {
+    net: "Can't reach Dropbox. Check the connection and try again.",
+    signedout: "Dropbox has signed this phone out. Please sign in again.",
+    missing: "Signed in. There is no budget file in the app's Dropbox folder yet. It appears after your first entry on the laptop.",
+    bad: `The file in Dropbox could not be read: ${problem.message}`,
+  }[problem.kind]);
+  const m = $("#cmsg");
+  m.textContent = text;
+  m.className = "msg" + (message || (problem && problem.kind !== "missing" && !checking) ? " err" : "");
+}
+
+/* What went wrong on the last check, shown above the figures. */
+function notice() {
+  const n = $("#notice");
+  if (!DBX || !problem || !copy) { n.innerHTML = ""; return; }
+  const last = `Showing the copy checked ${when(copy.checked)}.`;
+  const text = {
+    net: `Can't reach Dropbox. ${last}`,
+    signedout: `Dropbox has signed this phone out. ${last}`,
+    missing: `The budget file is no longer in Dropbox. ${last}`,
+    bad: `The file in Dropbox could not be read (${problem.message}). Showing the last good copy.`,
+  }[problem.kind];
+  const act = problem.kind === "signedout" ? ` <button class="quiet" type="button" data-act="signin">Sign in again</button>` : "";
+  n.innerHTML = `<div class="panel flag${problem.kind === "net" ? " dim" : ""}">${ICON[problem.kind === "net" ? "wait" : "warn"]}<span>${esc(text)}${act}</span></div>`;
+}
+
+async function startDropbox() {
+  $("#lockLabel").textContent = "Sign out";
+  $("#lockBtn").setAttribute("aria-label", "Sign out of Dropbox, and forget the copy on this phone");
+  const q = new URLSearchParams(location.search);
+  if ((q.has("code") || q.has("error")) && !(await finishSignIn(q))) return;
+  auth = auth || await kvGet("dropbox");
+  copy = await kvGet("copy");
+  if (copy) show({ data: copy.data, publishedAt: localStamp(copy.modified) });
+  if (!auth) {
+    problem = copy ? new DbxError("signedout", "") : null;
+    return copy ? notice() : showConnect();
+  }
+  await check();
+}
+
+if (DBX) {
+  $("#signInBtn").addEventListener("click", signIn);
+  $("#againBtn").addEventListener("click", check);
+  $("#signOutLink").addEventListener("click", signOut);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && auth && Date.now() - (copy?.checked || 0) > 60000) check();
+  });
+  window.addEventListener("online", () => { if (auth) check(); });
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+/* ------------------------------------------------------------------ *
+ * State and navigation. Views are named by a bare token in the hash
+ * (#status, #owed, #history, #salary, #help, #h-<head id>) so the phone's
+ * back button works. A trail of visited tokens lets "back" name where it
+ * goes and restore that view's scroll position.
+ * ------------------------------------------------------------------ */
+let M = null, PUB = null, current = null;
+const trail = [];
+const scrollAt = new Map();
+const ui = { stage: {}, hist: { q: "", head: "all", stage: "all" }, fy: null, slip: null };
+
+function show(payload, note = "") {
+  try { validate(payload.data); }
+  catch (e) { return SEALED ? showLock("The data in this page is damaged: " + e.message, true) : showConnect("The saved copy is damaged: " + e.message); }
+  M = buildModel(payload.data, TODAY);
+  PUB = payload.publishedAt;
+  $("#ribbon").hidden = !payload.data.sample;
+  stamp();
+  notice();
+  const first = $("#app").hidden;
+  $("#lock").hidden = true;
+  $("#connect").hidden = true;
+  $("#app").hidden = false;
+  if (first || !current || !known(current)) { trail.length = 0; route(); }
+  else { const y = window.scrollY; draw(); window.scrollTo(0, y); } // newer data while the app is open: stay put
+  if (note) toastNote(note);
+}
+
+/* "Updated" is when the figures were last saved: the build time for a
+   sealed page, the laptop's save time for the Dropbox file. */
+function stamp() {
+  const saved = `Updated ${dLong(PUB.slice(0, 10))}, ${PUB.slice(11, 16)}`;
+  if (DBX) {
+    $("#stamp").innerHTML = `<span>${saved}</span><button class="refresh" type="button" data-act="refresh" aria-label="Check Dropbox for a newer copy"${checking ? ' aria-busy="true" disabled' : ""}>${REFRESH}</button>`;
+    return;
+  }
+  const age = daysBetween(PUB.slice(0, 10), TODAY);
+  $("#stamp").innerHTML = `${age >= 7 ? ICON.warn : ""}<span>${saved}${age >= 7 ? ` · ${days(age)} ago` : ""}</span>`;
+}
+
+function toastNote(text) {
+  const v = $("#view .view");
+  if (v) v.insertAdjacentHTML("afterbegin", `<div class="panel flag dim">${ICON.wait}<span>${esc(text)}</span></div>`);
+}
+
+const headOf = tok => (tok.startsWith("h-") ? M.heads.find(x => "h-" + x.h.id === tok) : null);
+const known = tok => ["status", "owed", "history", "salary", "help"].includes(tok) || !!headOf(tok);
+const label = tok => ({ status: "Status", owed: "Owed to you", history: "History", salary: "Salary", help: "How to read this" })[tok]
+  || headOf(tok)?.h.name || "Status";
+const tabOf = tok => (["owed", "history", "salary"].includes(tok) ? tok : "status");
+
+function route() {
+  if (!M) return;
+  let tok = decodeURIComponent(location.hash.slice(1)) || "status";
+  if (!known(tok)) tok = "status";
+  if (current) scrollAt.set(current, window.scrollY);
+  const back = trail.at(-2) === tok;
+  if (back) trail.pop();
+  else if (trail.at(-1) !== tok) trail.push(tok);
+  current = tok;
+  draw();
+  window.scrollTo(0, back ? scrollAt.get(tok) || 0 : 0);
+}
+window.addEventListener("hashchange", route);
+
+document.addEventListener("click", ev => {
+  const tab = ev.target.closest("[data-tab]");
+  if (tab) {
+    trail.length = 0;
+    if (location.hash.slice(1) === tab.dataset.tab) { ev.preventDefault(); route(); }
+    return;
+  }
+  const a = ev.target.closest("[data-act]");
+  if (!a) return;
+  const { act, v, k } = a.dataset;
+  if (act === "signin") return void signIn();
+  if (act === "refresh") return void check();
+  const y = window.scrollY;
+  if (act === "stage") ui.stage[k] = v;
+  if (act === "hhead") ui.hist.head = v;
+  if (act === "hstage") ui.hist.stage = v;
+  if (act === "fy") { ui.fy = v; ui.slip = null; }
+  if (act === "slip") ui.slip = v;
+  draw();
+  window.scrollTo(0, y);
+});
+
+function draw() {
+  const tok = current, f = headOf(tok);
+  const html = tok === "owed" ? owedView()
+    : tok === "history" ? historyView()
+    : tok === "salary" ? salaryView()
+    : tok === "help" ? helpView()
+    : f ? (f.h.kind === "finite" ? finiteView(f) : openView(f))
+    : statusView();
+  $("#view").innerHTML = `<div class="view">${html}</div>`;
+  for (const t of document.querySelectorAll("[data-tab]")) {
+    if (t.dataset.tab === tabOf(tok)) t.setAttribute("aria-current", "page");
+    else t.removeAttribute("aria-current");
+  }
+  document.title = tok === "status" ? "Budgets & pay" : `${label(tok)} · Budgets & pay`;
+  if (tok === "history") wireSearch();
+}
+
+const backLink = () => {
+  const to = trail.at(-2) || "status";
+  return `<a class="back" href="#${esc(to)}"><svg class="chev" viewBox="0 0 8 14" aria-hidden="true" style="transform:scaleX(-1);color:currentColor"><path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${esc(label(to))}</a>`;
+};
+
+/* ------------------------------------------------------------------ *
+ * Pieces.
+ * ------------------------------------------------------------------ */
+const flagHtml = ([kind, text]) => `<div class="flag">${ICON[kind]}<span>${esc(text)}</span></div>`;
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+function meter(f) {
+  if (f.usedShare == null) return "";
+  const w = Math.max(0, Math.min(100, f.usedShare * 100));
+  return `<div class="meter ${f.state}" role="img" aria-label="${Math.round(f.usedShare * 100)}% used"><i style="width:${w.toFixed(1)}%"></i></div>`;
+}
+function meta(f, long = false) {
+  const used = f.usedShare == null ? "" : `${Math.max(0, Math.round(f.usedShare * 100))}% used of ${rs(f.h.total)}`;
+  const end = !f.h.validTill ? "no end date"
+    : f.left < 0 ? `ended ${dLong(f.h.validTill)}`
+    : `ends ${dLong(f.h.validTill)}${long ? `, in ${days(f.left)}` : ""}`;
+  return `<div class="meta"><span>${used}</span><span>${end}</span></div>`;
+}
+
+function foreignLine(e) {
+  if (!e.foreign) return "";
+  const f = `${esc(e.foreign.currency)} ${IN2.format(e.foreign.amount)}`;
+  return estimated(e)
+    ? `<div class="sub">${f} · rupee amount not fixed yet, estimated at ₹${IN2.format(e.foreign.rate)}</div>`
+    : `<div class="sub">${f} at ₹${IN2.format(e.foreign.rate)}</div>`;
+}
+
+function txRow(e, { purpose = false, head = false, extra = "" } = {}) {
+  const [kind, words] = standing(e, TODAY);
+  return `<div class="tx">
+    <div class="line"><span class="item">${esc(e.item)}</span><span class="amt">${approx(rupees(e), estimated(e))}</span></div>
+    <div class="sub">${dShort(e.date)} · ${e.paidBy === "me" ? "You paid" : "Institute paid"} · ${ICON[kind]}${esc(words)}</div>
+    ${head ? `<div class="sub">${esc(M.headName[e.head])}${extra}</div>` : ""}
+    ${purpose && e.purpose ? `<div class="sub purpose">${esc(e.purpose)}</div>` : ""}
+    ${foreignLine(e)}
+  </div>`;
+}
+
+/* Newest first, with a month heading whenever the month changes. */
+function byMonth(items, drawOne) {
+  let month = null;
+  return items.map(it => {
+    const m = it.key.slice(0, 7);
+    const head = m !== month ? `<div class="mon">${monthName(m)}</div>` : "";
+    month = m;
+    return head + drawOne(it);
+  }).join("");
+}
+
+const STAGES = [["all", "All"], ["waiting", "Waiting"], ["toclaim", "To claim"], ["settled", "Settled"]];
+function stageChips(exps, chosen, act, k = "") {
+  return `<div class="chips" role="group" aria-label="Filter by status">${STAGES.map(([v, name]) => {
+    const n = v === "all" ? exps.length : exps.filter(e => stage(e) === v).length;
+    return `<button class="chip" type="button" data-act="${act}" data-k="${esc(k)}" data-v="${v}" aria-pressed="${chosen === v}">${name}<b>${n}</b></button>`;
+  }).join("")}</div>`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Views.
+ * ------------------------------------------------------------------ */
+function statusView() {
+  const owed = sum(M.mine, rupees), cl = sum(M.claimed, rupees), un = sum(M.unclaimed, rupees);
+  const finite = M.heads.filter(x => x.h.kind === "finite");
+  const open = M.heads.filter(x => x.h.kind === "open");
+  const p = M.latest;
+
+  const cards = finite.map(f => `
+    <a class="rowlink" href="#h-${esc(f.h.id)}"><div class="body">
+      <div class="line"><span class="name">${esc(f.h.name)}${f.h.code ? `<small>${esc(f.h.code)}</small>` : ""}</span><span class="amt">${approx(f.available, f.est)}</span></div>
+      ${meter(f)}${meta(f)}${f.flags.map(flagHtml).join("")}
+    </div>${CHEV}</a>`).join("");
+
+  const rows = open.map(o => `
+    <a class="rowlink" href="#h-${esc(o.h.id)}"><div class="body">
+      <div class="line"><span class="name">${esc(o.h.name)}</span><span class="amt"><span class="cnt">${plural(o.fy.length, "item")}</span>${approx(o.total, o.est)}</span></div>
+      ${o.flags.map(flagHtml).join("")}
+    </div>${CHEV}</a>`).join("");
+
+  let salary = `<div class="panel note">No payslips entered yet.</div>`;
+  if (p) {
+    const gap = creditGap(p);
+    salary = `<div class="list"><a class="rowlink" href="#salary"><div class="body">
+      <div class="line"><span class="name">${monthName(p.month)} take-home</span><span class="amt">${rs(net(p))}</span></div>
+      ${flagHtml(gap == null ? ["wait", "Not credited yet"] : gap === 0 ? ["good", `Credited ${dShort(p.credited.date)}, matches payslip`]
+        : ["warn", `Credited ${rs(p.credited.amount)} on ${dShort(p.credited.date)}; payslip says ${rs(net(p))}`])}
+      <div class="meta"><span>FY ${fyLabel(TODAY)} so far: gross ${rs(sum(M.fySlips, gross))} · income tax ${rs(sum(M.fySlips, x => ofKind(x, "tax")))}</span></div>
+      ${M.short.filter(x => x !== p).map(x => flagHtml(["warn", `${monthName(x.month)}: bank credit ${rs(Math.abs(creditGap(x)))} ${creditGap(x) < 0 ? "less" : "more"} than payslip`])).join("")}
+    </div>${CHEV}</a></div>`;
+  }
+
+  return `
+    <a class="hero" href="#owed">
+      <span class="eyebrow">Owed to you</span>
+      <span class="big">${approx(owed, M.mine.some(estimated))}</span>
+      <span class="sub">${rs(cl)} claimed and waiting · ${approx(un, M.unclaimed.some(estimated))} not claimed yet</span>
+      ${CHEV}
+    </a>
+    <h2 class="sec">Budgets <span>available now</span></h2>
+    <div class="list">${cards}</div>
+    <h2 class="sec">Use-restricted <span>spent in FY ${fyLabel(TODAY)}</span></h2>
+    <div class="list">${rows}</div>
+    <h2 class="sec">Salary</h2>
+    ${salary}
+    <a class="textlink" href="#help">How to read this</a>`;
+}
+
+function owedView() {
+  const claimed = M.claimed.map(e => txRow(e, { head: true })).join("");
+  const unclaimed = M.unclaimed.map(e => txRow(e, { head: true, extra: ` · paid ${days(daysBetween(e.date, TODAY))} ago` })).join("");
+  return `
+    <h1 class="title">Owed to you</h1>
+    <p class="lede">${approx(sum(M.mine, rupees), M.mine.some(estimated))} across ${plural(M.mine.length, "expense")} you paid yourself and have not been reimbursed for.</p>
+    <h2 class="sec">Claimed, waiting <span class="num">${rs(sum(M.claimed, rupees))}</span></h2>
+    <div class="ledger">${claimed || `<div class="empty">Nothing waiting.</div>`}</div>
+    <h2 class="sec">Not claimed yet <span class="num">${approx(sum(M.unclaimed, rupees), M.unclaimed.some(estimated))}</span></h2>
+    <div class="ledger">${unclaimed || `<div class="empty">Nothing to claim.</div>`}</div>`;
+}
+
+function finiteView(f) {
+  const h = f.h;
+  const SHOW = 6;
+  const listed = f.pending.length > SHOW ? f.pending.slice(0, SHOW - 1) : f.pending;
+  const rest = f.pending.slice(listed.length);
+  const calc = `<div class="calc">
+    <div class="l"><span>${f.last ? `Balance from accounts, ${dLong(f.last.asOn)}` : "Total budget (no balance from accounts yet)"}</span><span>${rs(f.last ? f.last.balance : h.total ?? 0)}</span></div>
+    ${listed.map(e => `<div class="l minus"><span>− ${esc(e.item)}</span><span>${estimated(e) ? "≈ " : ""}${bare(rupees(e))}</span></div>`).join("")}
+    ${rest.length ? `<div class="l minus"><span>− ${rest.length} more not yet in it</span><span>${bare(sum(rest, rupees))}</span></div>` : ""}
+    <div class="l total"><span>Available now</span><span>${approx(f.available, f.est)}</span></div>
+  </div>`;
+  const staleDays = f.last ? daysBetween(f.last.asOn, TODAY) : 0;
+  const stale = staleDays > 90 ? flagHtml(["wait", `Latest balance is ${days(staleDays)} old. A fresh one from accounts would confirm it.`]) : "";
+
+  const chosen = ui.stage[h.id] || "all";
+  const exps = chosen === "all" ? f.exps : f.exps.filter(e => stage(e) === chosen);
+  const checkFor = new Map(f.checks.map(c => [c.statement, c]));
+  const items = [
+    ...exps.map(e => ({ key: e.date, e })),
+    ...(chosen === "all" ? f.sts.map(s => ({ key: s.asOn, s })) : []),
+  ].sort((a, b) => (a.key > b.key ? -1 : a.key < b.key ? 1 : a.s ? -1 : 1));
+  const ledger = byMonth(items, it => {
+    if (it.e) return txRow(it.e);
+    const s = it.s, c = checkFor.get(s);
+    const line = !c ? `<div class="sub">Starting balance</div>`
+      : Math.round(c.gap) === 0
+        ? `<div class="flag dim">${ICON.good}<span>Matches the ${dShort(c.prev.asOn)} balance less what was charged since</span></div>`
+        : `<div class="flag dim">${ICON.warn}<span>${rs(Math.abs(c.gap))} ${c.gap < 0 ? "below" : "above"} the ${rs(c.expected)} expected from the ${dShort(c.prev.asOn)} balance${c.gap < 0 ? ". Look for a charge not recorded here." : ". A top-up, or a charge reversed?"}</span></div>`;
+    return `<div class="stmt">
+      <div class="line"><span class="item">Balance from accounts</span><span class="amt">${rs(s.balance)}</span></div>
+      <div class="sub">As on ${dLong(s.asOn)}${s.source ? ` · ${esc(s.source)}` : ""}</div>${line}</div>`;
+  });
+
+  return `${backLink()}
+    <h1 class="title">${esc(h.name)}${h.code ? `<small>${esc(h.code)}</small>` : ""}</h1>
+    ${h.usedFor ? `<p class="lede">${esc(h.usedFor)}</p>` : ""}
+    ${calc}
+    <p class="note">Taken off: expenses not yet in that balance, meaning claims not yet reimbursed and institute bookings not yet charged.</p>
+    <div class="panel">${meter(f)}${meta(f, true)}${f.flags.map(flagHtml).join("")}${stale}</div>
+    <h2 class="sec">History</h2>
+    ${stageChips(f.exps, chosen, "stage", h.id)}
+    <div class="ledger">${ledger || `<div class="empty">Nothing here.</div>`}</div>`;
+}
+
+function openView(o) {
+  const max = Math.max(1, ...o.purposes.map(([, p]) => p.total));
+  const bars = o.purposes.map(([name, p]) => `<div class="bar">
+      <div class="line"><span class="lab">${esc(name)}</span><span class="amt">${approx(p.total, p.est)}</span></div>
+      <div class="track"><i style="width:${((p.total / max) * 100).toFixed(1)}%"></i></div></div>`).join("");
+  const chosen = ui.stage[o.h.id] || "all";
+  const exps = (chosen === "all" ? o.exps : o.exps.filter(e => stage(e) === chosen)).slice().reverse();
+  return `${backLink()}
+    <h1 class="title">${esc(o.h.name)}</h1>
+    <p class="lede">${esc(o.h.usedFor || "")} · no spending limit</p>
+    <div class="tiles"><div class="tile wide"><span class="k">Spent in FY ${fyLabel(TODAY)}</span><span class="v">${approx(o.total, o.est)}</span><span class="k">${plural(o.fy.length, "item")}</span></div></div>
+    ${o.flags.map(flagHtml).join("")}
+    ${bars ? `<h2 class="sec">This FY, by purpose</h2><div class="panel">${bars}</div>` : ""}
+    <h2 class="sec">History</h2>
+    ${stageChips(o.exps, chosen, "stage", o.h.id)}
+    <div class="ledger">${byMonth(exps.map(e => ({ key: e.date, e })), it => txRow(it.e, { purpose: true })) || `<div class="empty">Nothing here.</div>`}</div>`;
+}
+
+/* History: every expense, searchable and filterable. */
+function histMatches() {
+  const { q, head, stage: st } = ui.hist;
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  return M.d.expenses.filter(e => {
+    if (head !== "all" && e.head !== head) return false;
+    if (st !== "all" && stage(e) !== st) return false;
+    if (!words.length) return true;
+    const hay = [e.item, e.purpose, M.headName[e.head], e.foreign?.currency, String(rupees(e)), bare(rupees(e)), monthName(e.date.slice(0, 7))]
+      .filter(Boolean).join(" ").toLowerCase();
+    return words.every(w => hay.includes(w));
+  }).sort((a, b) => -byDate(a, b));
+}
+function histBody() {
+  const xs = histMatches();
+  const tally = `<div class="tally"><span>${plural(xs.length, "expense")}</span><b>${approx(sum(xs, rupees), xs.some(estimated))}</b></div>`;
+  const list = byMonth(xs.map(e => ({ key: e.date, e })), it => txRow(it.e, { head: true, purpose: true }));
+  return `${tally}<div class="ledger">${list || `<div class="empty">No expenses match.</div>`}</div>`;
+}
+function historyView() {
+  const heads = [["all", "All heads"], ...M.d.heads.map(h => [h.id, h.name])];
+  const base = M.d.expenses.filter(e => ui.hist.head === "all" || e.head === ui.hist.head);
+  return `
+    <h1 class="title">History</h1>
+    <input class="search" id="q" type="search" placeholder="Search: item, purpose, amount, month" value="${esc(ui.hist.q)}" aria-label="Search expenses">
+    <div class="chips" role="group" aria-label="Filter by head">${heads.map(([v, n]) =>
+      `<button class="chip" type="button" data-act="hhead" data-v="${esc(v)}" aria-pressed="${ui.hist.head === v}">${esc(n)}</button>`).join("")}</div>
+    ${stageChips(base, ui.hist.stage, "hstage")}
+    <div id="histBody" class="view">${histBody()}</div>`;
+}
+function wireSearch() {
+  const q = $("#q");
+  q.addEventListener("input", () => { ui.hist.q = q.value; $("#histBody").innerHTML = histBody(); });
+}
+
+function salaryView() {
+  if (!M.slips.length) return `<h1 class="title">Salary</h1><div class="panel note">No payslips entered yet.</div>`;
+  const fyOf = p => fyStart(p.month + "-01");
+  const fys = [...new Set(M.slips.map(fyOf))].sort().reverse();
+  const fy = ui.fy && fys.includes(ui.fy) ? ui.fy : fys.includes(fyStart(TODAY)) ? fyStart(TODAY) : fys[0];
+  const S = M.slips.filter(p => fyOf(p) === fy);
+  const sel = S.find(p => p.month === ui.slip) || S.at(-1);
+  const span = `${MONTH[parts(S[0].month)[1] - 1]} to ${MONTH[parts(S.at(-1).month)[1] - 1]}`;
+  const tile = (k, v) => `<div class="tile"><span class="k">${k}</span><span class="v">${rs(v)}</span></div>`;
+  const bank = p => {
+    const g = creditGap(p);
+    return g == null ? ICON.wait : g === 0 ? ICON.good : `${ICON.warn}<span class="gap">${g < 0 ? "−" : "+"}${bare(Math.abs(g))}</span>`;
+  };
+  const rows = S.map(p => `<tr data-act="slip" data-v="${p.month}" aria-selected="${p === sel}">
+    <td>${MON[parts(p.month)[1] - 1]}</td><td>${bare(gross(p))}</td><td>${bare(ofKind(p, "tax"))}</td><td>${bare(net(p))}</td><td class="bank">${bank(p)}</td></tr>`).join("");
+  const list = xs => xs.map(x => `<div class="l"><span>${esc(x.label)}</span><span>${bare(x.amount)}</span></div>`).join("");
+  const short = S.filter(p => p.credited && creditGap(p) !== 0);
+
+  return `
+    <h1 class="title">Salary</h1>
+    ${fys.length > 1 ? `<div class="chips" role="group" aria-label="Financial year">${fys.map(y =>
+      `<button class="chip" type="button" data-act="fy" data-v="${y}" aria-pressed="${y === fy}">FY ${fyLabel(y)}</button>`).join("")}</div>` : ""}
+    <p class="lede">FY ${fyLabel(fy)}${fy === fyStart(TODAY) ? " so far" : ""} · ${span}</p>
+    <div class="tiles">
+      ${tile("Gross pay", sum(S, gross))}
+      ${tile("Income tax deducted", sum(S, x => ofKind(x, "tax")))}
+      ${tile("NPS / PF, your share", sum(S, x => ofKind(x, "retirement")))}
+      ${tile("Take-home", sum(S, net))}
+    </div>
+    ${short.map(x => flagHtml(["warn", `${monthName(x.month)}: bank credit ${rs(Math.abs(creditGap(x)))} ${creditGap(x) < 0 ? "less" : "more"} than the payslip's take-home`])).join("")}
+    <div class="tablebox"><table class="sal">
+      <thead><tr><th>Month</th><th>Gross</th><th>Tax</th><th>Take-home</th><th>Bank</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td>Total</td><td>${bare(sum(S, gross))}</td><td>${bare(sum(S, x => ofKind(x, "tax")))}</td><td>${bare(sum(S, net))}</td><td></td></tr></tfoot>
+    </table></div>
+    <p class="note">Tap a month for its payslip.</p>
+    <h2 class="sec">${monthName(sel.month)} payslip</h2>
+    <div class="calc">
+      <div class="l sh"><span>Earnings</span></div>${list(sel.earnings)}
+      <div class="l total"><span>Gross</span><span>${rs(gross(sel))}</span></div>
+      <div class="l sh"><span>Deductions</span></div>${list(sel.deductions)}
+      <div class="l total"><span>Take-home</span><span>${rs(net(sel))}</span></div>
+    </div>
+    ${sel.credited ? flagHtml(creditGap(sel) === 0 ? ["good", `Credited ${dLong(sel.credited.date)}, matches`] : ["warn", `Credited ${rs(sel.credited.amount)} on ${dLong(sel.credited.date)}`]) : ""}`;
+}
+
+function helpView() {
+  return `${backLink()}
+    <h1 class="title">How to read this</h1>
+    <div class="panel prose">
+      <p><b>Available now</b> on a budget is the latest balance you entered from accounts, less every expense not yet in it: claims not yet reimbursed and institute bookings not yet charged. Each head's page shows the subtraction line by line.</p>
+      <p><b>Balance check.</b> When a new balance from accounts arrives, it is compared with the previous one less what was charged in between. A gap means something was charged that is not recorded here, or the reverse.</p>
+      <p><b>Use-restricted heads</b> have no limit. They show what was spent in the financial year (April to March), grouped by purpose.</p>
+      <p><b>≈</b> marks an amount that includes a foreign-currency expense whose rupee figure is not fixed yet. It is estimated at the rate entered until the rupee amount is known.</p>
+    </div>
+    <div class="panel legend">
+      <div class="flag">${ICON.good}<span>Settled: reimbursed, charged, or the bank credit matches the payslip</span></div>
+      <div class="flag dim">${ICON.wait}<span>On its way: claimed, booked, or waiting</span></div>
+      <div class="flag dim">${ICON.todo}<span>Not claimed yet: you need to act</span></div>
+      <div class="flag">${ICON.warn}<span>Worth a look: running low, ending soon, or a gap</span></div>
+      <div class="flag">${ICON.crit}<span>Problem: overspent or ended</span></div>
+    </div>
+    <div class="panel prose">${DBX
+      ? `<p><b>Where the figures come from.</b> Each time you open the app it reads <b>${esc(DBX.file.replace(/^\//, ""))}</b> from the app's own folder in your Dropbox (under Apps), the file the laptop saves. The last copy stays on this phone, so the app also opens offline. ↻ beside “Updated” checks again.</p>
+         <p><b>Sign out</b>, at the top, ends the Dropbox sign-in and deletes the copy from this phone.</p>`
+      : `<p><b>Lock</b>, at the top, forgets the key on this phone. The passphrase is then needed again.</p>`}</div>`;
+}
+
+if (DBX) startDropbox(); else startSealed();
+</script>
+
+</body>
+</html>
