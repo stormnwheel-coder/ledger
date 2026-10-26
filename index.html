@@ -3,585 +3,354 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1kFiadwLfo8407m9qvkq8X4uOD6RUKSvN9b3K9U7Gw4='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-nWrVKW9QbCswvmwSTlMpTi8JojJKl5Ed/J94CCpmMx4='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'">
-<meta name="referrer" content="no-referrer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } [hidden] { display: none !important; }</style>
-</head>
-<body>
 <title>Budgets &amp; pay</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="robots" content="noindex, nofollow">
 <style>
-/* A pocket passbook: one column, the summary first, and every head opens
-   into its own ruled ledger. Cool paper, ink-blue accent, status colours
-   kept for state alone and always paired with an icon and words. */
 :root {
-  --bg: #f2f4f7;
-  --card: #ffffff;
-  --ink: #101720;
-  --ink-2: #4a5462;
-  --muted: #7a8494;
-  --rule: #e3e6eb;
-  --rule-2: #c9cfd8;
-  --accent: #2a78d6;
-  --accent-soft: #d6e5f8;
-  --accent-ink: #ffffff;
-  --chip: #e6eaf0;
-  --good: #0ca30c;
-  --warn: #fab219;
-  --crit: #d03b3b;
-  --warn-soft: #fbe9c4;
-  --crit-soft: #f6d6d6;
-  --ribbon: #fbe3e3;
-  --ribbon-ink: #a52a2a;
+  --bg: #f2f4f7; --card: #ffffff; --ink: #101720; --ink-2: #4a5462; --muted: #7a8494;
+  --rule: #e3e6eb; --rule-2: #c9cfd8; --accent: #2a78d6; --accent-soft: #d6e5f8; --accent-ink: #fff;
+  --chip: #e6eaf0; --hover: #f6f8fb; --good: #0ca30c; --warn: #fab219; --crit: #d03b3b;
+  --warn-soft: #fbe9c4; --crit-soft: #f6d6d6; --ribbon: #fbe3e3; --ribbon-ink: #a52a2a;
+  --shadow: 0 10px 40px rgba(16, 23, 32, .18);
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  --r: 16px;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root {
     --bg: #0d0f12; --card: #171a1f; --ink: #eef1f5; --ink-2: #b6bdc8; --muted: #868e9b;
-    --rule: #252a31; --rule-2: #353b45; --accent: #3987e5; --accent-soft: #1b2b42; --accent-ink: #ffffff;
-    --chip: #222830; --warn-soft: #3a2e10; --crit-soft: #3d1c1c; --ribbon: #3a1a1a; --ribbon-ink: #f2a3a3;
+    --rule: #252a31; --rule-2: #353b45; --accent: #3987e5; --accent-soft: #1b2b42;
+    --chip: #222830; --hover: #1c2026; --warn-soft: #3a2e10; --crit-soft: #3d1c1c; --ribbon: #3a1a1a; --ribbon-ink: #f2a3a3;
+    --shadow: 0 10px 40px rgba(0, 0, 0, .5);
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #0d0f12; --card: #171a1f; --ink: #eef1f5; --ink-2: #b6bdc8; --muted: #868e9b;
-  --rule: #252a31; --rule-2: #353b45; --accent: #3987e5; --accent-soft: #1b2b42; --accent-ink: #ffffff;
-  --chip: #222830; --warn-soft: #3a2e10; --crit-soft: #3d1c1c; --ribbon: #3a1a1a; --ribbon-ink: #f2a3a3;
-  color-scheme: dark;
-}
-
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.42 var(--font); }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); }
+button, input, select, textarea { font: inherit; color: inherit; }
 a { color: inherit; text-decoration: none; }
-button, input { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-.num { font-variant-numeric: tabular-nums; }
-.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num, .r { font-variant-numeric: tabular-nums; }
+kbd { font: 600 10.5px ui-monospace, "SF Mono", Menlo, monospace; border: 1px solid var(--rule-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; color: var(--muted); margin-left: auto; }
 
-.ribbon { background: var(--ribbon); color: var(--ribbon-ink); font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
-.ribbon .wrap { padding-block: 6px; text-align: center; }
+/* Shell: a sidebar of actions and places, and the page. */
+.shell { display: grid; grid-template-columns: 256px 1fr; min-height: 100vh; }
+.side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; padding: 18px 14px; border-right: 1px solid var(--rule); background: var(--card); }
+.brand { font-weight: 750; font-size: 16px; letter-spacing: -.01em; padding: 2px 8px 10px; }
+.brand small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); letter-spacing: 0; }
+.side .primary { margin-bottom: 2px; }
+.side .ghost { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; }
+.side nav { display: flex; flex-direction: column; gap: 1px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule); }
+.side nav a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; color: var(--ink-2); font-weight: 560; }
+.side nav a:hover { background: var(--hover); }
+.side nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.side nav .n { margin-left: auto; font-size: 12px; font-weight: 650; background: var(--warn-soft); color: var(--ink); border-radius: 999px; padding: 0 7px; }
+.side .foot { margin-top: auto; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--ink-2); padding: 0 8px; }
+.side .foot a, .side .foot button { color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font-weight: 560; }
+#saved { display: flex; align-items: center; gap: 6px; }
+#saved .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex: none; }
+#saved.busy .dot { background: var(--muted); }
+#saved.bad .dot { background: var(--crit); }
 
-.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 6px; }
-.brand { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
-.stamp { margin: 1px 0 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
-.iconbtn { background: none; border: 0; padding: 8px; margin: -8px; color: var(--ink-2); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
-.iconbtn svg { width: 18px; height: 18px; }
+main { padding: 26px 36px 80px; max-width: 1180px; width: 100%; }
+.pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.pagehead h1 { margin: 0; font-size: 26px; font-weight: 750; letter-spacing: -.02em; }
+.pagehead p { margin: 3px 0 0; color: var(--ink-2); }
+h2.sec { font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 26px 0 10px; display: flex; justify-content: space-between; align-items: baseline; }
+h2.sec span { text-transform: none; letter-spacing: 0; font-weight: 560; }
 
-main.wrap { padding-block: 4px calc(92px + env(safe-area-inset-bottom, 0px)); }
-.view { display: flex; flex-direction: column; gap: 10px; }
+/* Buttons and inputs. */
+.primary, .ghost, .mini, .danger { border-radius: 9px; cursor: pointer; font-weight: 650; border: 1px solid transparent; }
+.primary { background: var(--accent); color: var(--accent-ink); padding: 9px 14px; display: flex; align-items: center; gap: 8px; }
+.primary kbd { color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.45); }
+.primary:disabled { opacity: .55; cursor: not-allowed; }
+.ghost { background: transparent; color: var(--ink); padding: 8px 12px; border-color: var(--rule-2); }
+.ghost:hover, .mini:hover { background: var(--hover); }
+.side .ghost { border-color: transparent; color: var(--ink-2); font-weight: 560; }
+.mini { background: var(--card); border-color: var(--rule-2); padding: 3px 9px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.danger { background: transparent; color: var(--crit); padding: 8px 12px; border-color: var(--crit-soft); }
+.danger.armed { background: var(--crit); color: #fff; }
+.link { background: none; border: 0; color: var(--accent); font-weight: 600; cursor: pointer; padding: 0; }
+input[type=text], input[type=date], input[type=month], input[type=search], input:not([type]), select, textarea {
+  border: 1px solid var(--rule-2); background: var(--card); border-radius: 8px; padding: 7px 10px; min-height: 36px; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+input.bad { border-color: var(--crit); box-shadow: 0 0 0 3px var(--crit-soft); }
+input.amt { text-align: right; font-variant-numeric: tabular-nums; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 0; background: var(--chip); border-radius: 999px; padding: 5px 11px; font-size: 13px; font-weight: 560; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--card); }
 
-h1.title { margin: 2px 0 0; font-size: 26px; line-height: 1.15; font-weight: 750; letter-spacing: -.02em; text-wrap: balance; }
-h1.title small { font-size: 16px; font-weight: 500; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
-.lede { margin: 0; color: var(--ink-2); font-size: 13.5px; }
-.back { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 600; font-size: 14px; padding: 6px 0 2px; align-self: flex-start; }
-.sec { margin: 14px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
-.sec span { font-weight: 600; letter-spacing: .03em; text-transform: none; font-size: 12px; }
-
-.ic { width: 13px; height: 13px; flex: none; }
-.chev { width: 7px; height: 12px; color: var(--muted); flex: none; }
-
-/* Owed to you: the one hero figure. */
-.hero { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 12px; background: var(--card); border-radius: var(--r); padding: 14px 16px 15px; }
-.hero .eyebrow { grid-column: 1; font-size: 13px; color: var(--ink-2); }
-.hero .big { grid-column: 1; font-size: 38px; font-weight: 750; letter-spacing: -.03em; line-height: 1.1; }
-.hero .sub { grid-column: 1; font-size: 12.5px; color: var(--ink-2); }
-.hero .chev { grid-column: 2; grid-row: 1 / span 3; }
-
-/* Grouped lists: one surface per group, hairlines between rows. */
-.list { background: var(--card); border-radius: var(--r); overflow: hidden; }
-.list > * + * { border-top: 1px solid var(--rule); }
-.rowlink { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; align-items: center; padding: 12px 14px 12px 16px; }
-.rowlink > .body { min-width: 0; }
-.line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.name { font-weight: 620; font-size: 15.5px; }
-.name small { font-weight: 450; color: var(--ink-2); font-size: 13px; margin-left: 4px; }
-.amt { font-weight: 680; font-size: 16px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.meta { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.cnt { font-size: 12.5px; color: var(--ink-2); font-weight: 400; margin-right: 8px; }
-
-.meter { height: 6px; border-radius: 3px; margin-top: 7px; overflow: hidden; background: var(--accent-soft); }
+/* Cards, tiles, meters, flags. */
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tile { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; cursor: pointer; text-align: left; }
+.tile:hover { border-color: var(--rule-2); }
+.tile .k { font-size: 12.5px; color: var(--ink-2); font-weight: 560; }
+.tile .v { font-size: 24px; font-weight: 750; letter-spacing: -.02em; margin-top: 2px; }
+.tile .s { font-size: 12.5px; color: var(--ink-2); }
+.tile.hero .v { font-size: 30px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.hcard { display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
+.hcard:hover { border-color: var(--rule-2); }
+.hcard .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.hcard .name { font-weight: 680; font-size: 15px; }
+.hcard .code { color: var(--muted); font-size: 12.5px; margin-left: 6px; font-weight: 500; }
+.hcard .big { font-size: 24px; font-weight: 750; letter-spacing: -.02em; }
+.hcard .lbl, .meta { font-size: 12.5px; color: var(--ink-2); }
+.meter { height: 6px; border-radius: 3px; overflow: hidden; background: var(--accent-soft); margin: 4px 0 2px; }
 .meter i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
 .meter.warn { background: var(--warn-soft); } .meter.warn i { background: var(--warn); }
 .meter.crit { background: var(--crit-soft); } .meter.crit i { background: var(--crit); }
-
-.flag { font-size: 12.5px; margin-top: 5px; display: flex; gap: 7px; align-items: flex-start; color: var(--ink); }
+.flag { font-size: 12.5px; display: flex; gap: 6px; align-items: flex-start; margin-top: 3px; }
 .flag .ic { margin-top: 2.5px; }
-.flag > span { flex: 1; min-width: 0; }
-.flag.dim { color: var(--ink-2); }
+.ic { width: 13px; height: 13px; flex: none; display: inline-block; vertical-align: -2px; }
 
-/* The working behind "available now". */
-.calc { background: var(--card); border-radius: var(--r); padding: 12px 16px 13px; }
-.calc .l { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding: 2.5px 0; font-variant-numeric: tabular-nums; }
-.calc .l > span:first-child { min-width: 0; }
-.calc .minus { color: var(--ink-2); }
-.calc .total { border-top: 1px solid var(--rule-2); margin-top: 5px; padding-top: 7px; font-weight: 720; font-size: 16px; }
-.calc .sh { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding-top: 8px; }
-.calc .sh:first-child { padding-top: 0; }
-.note { font-size: 12px; color: var(--ink-2); margin: 0; }
-.panel { background: var(--card); border-radius: var(--r); padding: 12px 16px 13px; }
+/* Tables. */
+table.t { width: 100%; border-collapse: collapse; }
+.t th { text-align: left; font-size: 11.5px; font-weight: 650; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
+.t td { padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.t tr:last-child td { border-bottom: 0; }
+.t .r { text-align: right; white-space: nowrap; }
+.t .ck { width: 30px; padding-right: 0; }
+.t .ck input { width: 16px; height: 16px; accent-color: var(--accent); margin: 2px 0 0; }
+.t tbody tr[data-edit] { cursor: pointer; }
+.t tbody tr[data-edit]:hover td { background: var(--hover); }
+.t tr.mon td { background: var(--bg); font-size: 12px; font-weight: 700; color: var(--muted); padding: 6px 10px; cursor: default; }
+.t .sub { font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
+.t .nowrap { white-space: nowrap; }
+.t .act { width: 1%; }
+.t tr .hov { visibility: hidden; }
+.t tr:hover .hov, .t tr:focus-within .hov { visibility: visible; }
+.t tfoot td { font-weight: 700; border-top: 1px solid var(--rule-2); border-bottom: 0; }
+.empty { color: var(--ink-2); padding: 10px 0 2px; }
+.fix { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--ink-2); }
+.fix input { width: 120px; min-height: 28px; padding: 3px 8px; }
 
-/* Ledger rows. */
-.ledger { background: var(--card); border-radius: var(--r); padding: 2px 16px 4px; }
-.mon { font-size: 12px; font-weight: 700; color: var(--muted); padding: 12px 0 5px; border-bottom: 1px solid var(--rule-2); letter-spacing: .02em; }
-.tx { padding: 10px 0 11px; }
-.tx + .tx { border-top: 1px solid var(--rule); }
-.tx .item { font-size: 15px; font-weight: 520; min-width: 0; }
-.tx .amt { font-size: 15px; font-weight: 640; }
-.sub { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; }
-.sub .ic { display: inline-block; vertical-align: -2px; margin: 0 4px 0 1px; color: var(--ink-2); }
-.sub.purpose { color: var(--ink); }
-.stmt { background: var(--bg); border-radius: 12px; padding: 9px 12px 10px; margin: 8px -4px; }
-.stmt .item { font-weight: 600; }
-.empty { color: var(--ink-2); font-size: 13.5px; padding: 14px 0; text-align: center; }
+.act-card { padding: 0; overflow: hidden; }
+.act-card > header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 18px 8px; }
+.act-card h3 { margin: 0; font-size: 15px; }
+.act-card h3 .count { color: var(--ink-2); font-weight: 560; font-size: 13px; margin-left: 8px; }
+.act-card header p { margin: 2px 0 0; color: var(--ink-2); font-size: 12.5px; }
+.act-card .t { margin: 0 8px; width: calc(100% - 16px); }
+.act-card .done { padding: 4px 18px 16px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.bulk { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 18px; background: var(--accent-soft); border-top: 1px solid var(--rule); }
+.bulk input[type=date] { width: 160px; min-height: 32px; padding: 4px 8px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.toolbar input[type=search] { width: 280px; }
+.toolbar select { width: auto; }
 
-/* Filters. */
-.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; margin: 0 -2px; }
-.chips::-webkit-scrollbar { display: none; }
-.chip { flex: none; border: 0; background: var(--chip); color: var(--ink); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 560; cursor: pointer; white-space: nowrap; }
-.chip b { font-weight: 500; color: var(--ink-2); margin-left: 4px; font-variant-numeric: tabular-nums; }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--card); }
-.chip[aria-pressed="true"] b { color: var(--card); opacity: .75; }
-.search { width: 100%; border: 1px solid var(--rule-2); background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 15px; }
-.search::placeholder { color: var(--muted); }
-.tally { font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; }
-.tally b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.start { max-width: 640px; margin: 8vh auto; }
+.start h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -.02em; }
+.start p { color: var(--ink-2); margin: 0 0 14px; }
+.start label.row { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--rule); }
+.start label.row input { width: 16px; height: 16px; accent-color: var(--accent); }
+.start .kind { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+.start .btns { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+.steps { display: flex; flex-direction: column; gap: 8px; }
+.steps .st { display: flex; gap: 10px; align-items: flex-start; }
+.steps .st .ic { margin-top: 3px; }
+.steps .st.ok { color: var(--ink-2); }
+.steps .st .chips { margin-top: 6px; }
+.ribbon { background: var(--ribbon); color: var(--ribbon-ink); padding: 8px 16px; font-weight: 650; display: flex; gap: 12px; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 4; }
+.ribbon button { background: var(--card); color: var(--ink); border: 0; border-radius: 999px; padding: 4px 12px; font-weight: 650; cursor: pointer; }
 
-/* Tiles and bars. */
-.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tile { background: var(--card); border-radius: var(--r); padding: 11px 14px 12px; min-width: 0; }
-.tile .k { display: block; font-size: 12.5px; color: var(--ink-2); }
-.tile .v { display: block; font-size: 21px; font-weight: 720; letter-spacing: -.015em; }
-.tile.wide { grid-column: 1 / -1; }
-.bar + .bar { margin-top: 10px; }
-.bar .lab { font-size: 13.5px; min-width: 0; }
-.bar .amt { font-size: 14px; }
-.bar .track { height: 8px; margin-top: 5px; }
-.bar .track i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 3px; }
+/* Status bar and toast. */
+#bar { position: sticky; top: 0; z-index: 6; padding: 10px 18px; font-weight: 600; text-align: center; }
+#bar.crit { background: var(--crit); color: #fff; }
+#bar.warn { background: var(--warn-soft); color: var(--ink); }
+#bar.info { background: var(--chip); color: var(--ink-2); font-weight: 560; }
+#bar button { margin-left: 8px; background: var(--card); color: var(--ink); border: 0; border-radius: 999px; padding: 4px 12px; font-weight: 650; cursor: pointer; }
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--card); border-radius: 12px; padding: 10px 14px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow); z-index: 30; max-width: min(640px, 90vw); }
+#toast.crit { background: var(--crit); color: #fff; }
+#toast button { background: none; border: 0; color: inherit; font-weight: 750; text-decoration: underline; cursor: pointer; padding: 0; }
 
-/* Salary table. */
-.tablebox { background: var(--card); border-radius: var(--r); padding: 6px 12px 8px; overflow-x: auto; }
-table.sal { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-.sal th { font-size: 11.5px; color: var(--muted); font-weight: 650; text-align: right; padding: 8px 0 6px 8px; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
-.sal td { text-align: right; padding: 9px 0 9px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
-.sal th:first-child, .sal td:first-child { text-align: left; padding-left: 2px; }
-.sal tbody tr { cursor: pointer; }
-.sal tbody tr[aria-selected="true"] td { background: var(--accent-soft); }
-.sal tbody tr[aria-selected="true"] td:first-child { border-radius: 8px 0 0 8px; }
-.sal tbody tr[aria-selected="true"] td:last-child { border-radius: 0 8px 8px 0; }
-.sal tfoot td { font-weight: 720; border-bottom: 0; }
-.sal .bank { width: 1%; }
-.sal .bank .ic { vertical-align: -2px; }
-.sal .gap { font-size: 12px; margin-left: 3px; }
-
-.textlink { color: var(--accent); font-weight: 600; font-size: 14px; padding: 8px 0; align-self: flex-start; }
-.legend .flag { font-size: 13.5px; margin-top: 9px; }
-.prose p { margin: 0 0 10px; font-size: 14px; }
-.prose p:last-child { margin-bottom: 0; }
-
-/* Bottom tabs. */
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--rule); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 5; }
-.tabs .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
-.tabs a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 9px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
-.tabs a svg { width: 23px; height: 23px; }
-.tabs a[aria-current="page"] { color: var(--accent); }
-
-/* Lock screen. */
-.lock { min-height: 100%; display: flex; align-items: center; }
-.lock .wrap { width: 100%; padding-block: 48px; }
-.lockcard { background: var(--card); border-radius: 20px; padding: 26px 20px 22px; display: flex; flex-direction: column; gap: 14px; }
-.lockcard .glyph { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
-.lockcard .glyph svg { width: 22px; height: 22px; }
-.lockcard h1 { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: -.02em; }
-.lockcard p { margin: 0; color: var(--ink-2); font-size: 14px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: 13px; font-weight: 600; }
-.pass { width: 100%; border: 1px solid var(--rule-2); background: var(--bg); border-radius: 12px; padding: 12px 14px; font-size: 16px; }
-.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--ink-2); }
-.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
-.primary { border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 16px; padding: 13px 16px; cursor: pointer; }
-.primary[disabled] { opacity: .6; cursor: progress; }
-.msg { min-height: 1.4em; font-size: 13.5px; color: var(--ink); }
-.msg.err { color: var(--crit); font-weight: 600; }
-.hint { background: var(--ribbon); color: var(--ribbon-ink); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.hint code { font: 600 14px ui-monospace, "SF Mono", Menlo, monospace; }
-.hint button { border: 0; background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 13px; cursor: pointer; flex: none; }
-.quiet { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 4px 0; cursor: pointer; align-self: flex-start; }
-
-/* Dropbox mode: the refresh button beside the stamp, and the notice row. */
-.refresh { background: none; border: 0; padding: 6px; margin: -6px -6px -6px -2px; color: var(--muted); cursor: pointer; display: inline-flex; }
-.refresh svg { width: 14px; height: 14px; }
-.refresh[aria-busy="true"] svg { animation: spin 1s linear infinite; }
+/* The drawer, where every form opens. */
+.scrim { position: fixed; inset: 0; background: rgba(10, 14, 20, .28); z-index: 10; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(500px, 100vw); background: var(--card); box-shadow: var(--shadow); z-index: 11; overflow-y: auto; }
+.drawer form { padding: 20px 22px 26px; display: flex; flex-direction: column; gap: 14px; }
+.drawer h2 { margin: 0; font-size: 20px; letter-spacing: -.01em; display: flex; justify-content: space-between; align-items: center; }
+.drawer h2 .x { background: none; border: 0; font-size: 22px; color: var(--muted); cursor: pointer; padding: 0 4px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > label, .field > .lab { font-size: 12.5px; font-weight: 650; color: var(--ink-2); }
+.field .hint { font-size: 12px; color: var(--muted); }
+.field .err { font-size: 12.5px; color: var(--crit); font-weight: 600; }
+.field > .link { align-self: flex-start; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.inline { display: flex; gap: 8px; align-items: center; }
+.inline input[type=date] { flex: 1; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg label { position: relative; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pills label { position: relative; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.pills label small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+.pills input { position: absolute; opacity: 0; pointer-events: none; }
+.pills label:has(input:checked) { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pills label:has(input:checked) small { color: rgba(255,255,255,.8); }
+.pills label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.box { border: 1px solid var(--rule); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.check { display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 13px; }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.progress { display: grid; grid-template-columns: 150px 1fr; gap: 8px 10px; align-items: center; }
+.progress input[type=date]:disabled { opacity: .45; }
+.impact { background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: flex; flex-direction: column; gap: 3px; }
+.impact b { font-variant-numeric: tabular-nums; }
+.lines { display: flex; flex-direction: column; gap: 6px; }
+.line3 { display: grid; grid-template-columns: 1fr 120px 28px; gap: 6px; align-items: center; }
+.line4 { display: grid; grid-template-columns: 1fr 110px 120px 28px; gap: 6px; align-items: center; }
+.line3 .rm, .line4 .rm { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; }
+.totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.totals div { background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.totals span { display: block; font-size: 12px; color: var(--ink-2); }
+.totals b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.btnrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; bottom: -26px; background: var(--card); padding: 12px 0 4px; border-top: 1px solid var(--rule); margin-top: 4px; }
+.btnrow .grow { flex: 1; }
+.formerr { background: var(--crit-soft); border-radius: 10px; padding: 9px 12px; font-weight: 600; font-size: 13px; }
+.note { font-size: 12.5px; color: var(--ink-2); }
+body.readonly .writes { opacity: .5; }
+.held { border-color: var(--warn); margin-bottom: 16px; }
+.held-row { padding: 10px 0; border-top: 1px solid var(--rule); }
+.held-row .sub { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+details.working { margin: 4px 0 10px; font-size: 13px; }
+details.working summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.working .l { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; font-variant-numeric: tabular-nums; }
+.working .l > span:first-child { min-width: 0; }
+.working .minus { color: var(--ink-2); }
+.working .total { border-top: 1px solid var(--rule-2); margin-top: 4px; padding-top: 5px; font-weight: 700; }
+.refresh { background: none; border: 0; padding: 0 2px; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; }
+.refresh[aria-busy] { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-#notice:empty { display: none; }
-#notice .panel { margin-top: 6px; }
-#notice .quiet { display: inline; padding: 0; font-size: inherit; }
+.ph { display: none; }
+@media (hover: none) { .t tr .hov { visibility: visible; } kbd { display: none; } }
+@media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .side { position: static; height: auto; } .tiles { grid-template-columns: 1fr 1fr; } main { padding: 18px 16px 60px; } }
 
-@media (prefers-reduced-motion: no-preference) {
-  .view { animation: rise .18s ease-out; }
-  @keyframes rise { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* Small screens (the phone): one column, the pages as tabs along the bottom,
+   + Expense floating above them, and each table row stacked as a block. */
+@media (max-width: 700px) {
+  body { font-size: 15px; padding-top: env(safe-area-inset-top, 0px); }
+  input[type=text], input[type=date], input[type=month], input[type=search], input:not([type]), select, textarea { font-size: 16px; min-height: 42px; }
+  .shell { display: block; min-height: 0; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 12px; padding: 12px 16px 2px; border: 0; background: none; }
+  .brand { padding: 0; font-size: 15px; flex: 1; }
+  .brand small { display: none; }
+  .side > .ghost[data-new] { display: none; }
+  .side > .primary[data-new] { position: fixed; right: 16px; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); z-index: 8; border-radius: 999px; padding: 13px 20px; box-shadow: var(--shadow); font-size: 15px; }
+  .side nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; flex-direction: row; gap: 0; margin: 0; padding: 0 0 env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--rule); background: var(--card); }
+  .side nav a { flex: 1; justify-content: center; padding: 16px 2px; border-radius: 0; font-size: 12.5px; position: relative; }
+  .side nav a[aria-current="page"] { background: none; box-shadow: inset 0 2px 0 var(--accent); }
+  .side nav .n { position: absolute; top: 2px; left: calc(50% + 16px); margin: 0; font-size: 10.5px; line-height: 15px; padding: 0 5px; }
+  .side .foot { width: 100%; margin: 0; padding: 0; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 16px; }
+  body.nodoc .side nav, body.nodoc .side > [data-new], body.connect .side .foot { display: none; }
+  main .pagehead [data-new=expense] { display: none; } /* the floating one does it */
+  .pagehead > :last-child:not(:first-child) { flex: none; white-space: nowrap; }
+  main { padding: 8px 16px calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .pagehead { align-items: center; margin-bottom: 12px; }
+  .pagehead h1 { font-size: 22px; }
+  .pagehead p { font-size: 13px; }
+  .tiles { gap: 8px; }
+  .tile.hero { grid-column: 1 / -1; }
+  .tile .v { font-size: 20px; }
+  .grid { grid-template-columns: 1fr; }
+  .toolbar input[type=search] { width: 100%; }
+  .start { margin: 3vh auto; }
+  .ph { display: revert; }
+  .t .dt { display: none !important; } /* over the stacked-row rules below */
+  .t, .t tbody, .t tfoot { display: block; }
+  .t thead { display: none; }
+  .t tbody tr, .t tfoot tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; padding: 11px 4px; border-bottom: 1px solid var(--rule); }
+  .t tbody tr:last-child { border-bottom: 0; }
+  .t td { display: block; padding: 0; border: 0; }
+  .t tr.mon { display: block; padding: 10px 4px 4px; border: 0; }
+  .t tr.mon td { padding: 0; background: none; }
+  .t .c-wide { grid-column: 1 / -1; }
+  .t .c-amt { text-align: right; font-weight: 650; }
+  .t-act thead { display: block !important; }
+  .t-act thead tr { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--rule-2); }
+  .t-act thead th { padding: 0; border: 0; }
+  .t-act tbody tr { grid-template-columns: 26px minmax(0, 1fr) auto !important; }
+  .t-act .c-act { grid-column: 2 / -1; text-align: left; }
+  .drawer { width: 100vw; }
+  .drawer form { padding: 16px 16px calc(26px + env(safe-area-inset-bottom, 0px)); }
+  .line3 { grid-template-columns: minmax(0, 1fr) 104px 28px; }
+  .line4 { grid-template-columns: minmax(0, 1fr) 104px 28px; }
+  .line4 select { grid-column: 1 / 3; grid-row: 2; }
+  .line4 .rm { grid-column: 3; grid-row: 1; }
+  .progress { grid-template-columns: 130px 1fr; }
+  #toast { bottom: calc(126px + env(safe-area-inset-bottom, 0px)); }
 }
 </style>
-
-<section class="lock" id="lock" hidden>
-  <div class="wrap">
-    <form class="lockcard" id="lockForm" autocomplete="on">
-      <div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></div>
-      <h1>Budgets &amp; pay</h1>
-      <p>Your figures are locked. Enter your passphrase to open them; this phone can remember it so you only do this once.</p>
-      
-      <div class="field">
-        <label for="pass">Passphrase</label>
-        <input class="pass" id="pass" name="password" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
-      </div>
-      <label class="check"><input type="checkbox" id="remember" checked><span>Remember on this phone. Anyone who can unlock the phone can then open this page.</span></label>
-      <button class="primary" id="unlockBtn" type="submit">Unlock</button>
-      <div class="msg" id="msg" role="status" aria-live="polite"></div>
-    </form>
-  </div>
-</section>
-
-<section class="lock" id="connect" hidden>
-  <div class="wrap">
-    <div class="lockcard">
-      <div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8.5 12 4l8.5 4.5L12 13z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3.5 13 12 17.5 20.5 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
-      <h1>Budgets &amp; pay</h1>
-      <p id="cintro">Your figures stay in your Dropbox. Sign in once and this phone stays signed in. The app can only read its own folder in your Dropbox, and cannot change anything.</p>
-      <button class="primary" id="signInBtn" type="button">Sign in with Dropbox</button>
-      <button class="primary" id="againBtn" type="button" hidden>Check again</button>
-      <div class="msg" id="cmsg" role="status" aria-live="polite"></div>
-      <button class="quiet" id="signOutLink" type="button" hidden>Sign out of Dropbox on this phone</button>
+</head>
+<body>
+<div id="bar" hidden></div>
+<div id="ribbon" class="ribbon" hidden>SAMPLE · invented figures · nothing entered here is saved <button type="button" data-act="gostart" data-only="laptop">Start my real budget</button></div>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">Budgets &amp; pay<small id="where"></small></div>
+    <button class="primary" type="button" data-new="expense">+ Expense <kbd>N</kbd></button>
+    <button class="ghost" type="button" data-new="balance">+ Balance from accounts <kbd>B</kbd></button>
+    <button class="ghost" type="button" data-new="payslip">+ Payslip <kbd>P</kbd></button>
+    <nav>
+      <a href="#overview" data-view="overview">Overview<span class="n" id="todoCount" hidden></span></a>
+      <a href="#expenses" data-view="expenses">Expenses</a>
+      <a href="#balances" data-view="balances">Balances</a>
+      <a href="#salary" data-view="salary">Salary</a>
+      <a href="#heads" data-view="heads">Heads</a>
+    </nav>
+    <div class="foot">
+      <div id="saved"><span class="dot"></span><span id="savedText">Loading…</span><button class="refresh" type="button" data-act="refresh" data-only="phone" aria-label="Check Dropbox for anything newer">↻</button></div>
+      <a id="phoneLink" href="#" target="_blank" rel="noopener" data-only="laptop">Open the phone app ↗</a>
+      <button type="button" data-act="reveal" data-only="laptop">Show the data file in Finder</button>
+      <button type="button" data-act="keys" data-only="laptop">Keyboard shortcuts</button>
+      <button type="button" data-act="signout" data-only="phone">Sign out</button>
     </div>
-  </div>
-</section>
-
-<div id="app" hidden>
-  <div class="ribbon" id="ribbon" hidden><div class="wrap">Sample · every figure here is invented</div></div>
-  <header class="top">
-    <div class="wrap">
-      <div><p class="brand">Budgets &amp; pay</p><p class="stamp" id="stamp"></p></div>
-      <button class="iconbtn" id="lockBtn" type="button" aria-label="Lock, and forget the key on this phone"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span id="lockLabel">Lock</span></button>
-    </div>
-  </header>
-  <div class="wrap" id="notice"></div>
-  <main class="wrap" id="view"></main>
-  <nav class="tabs" aria-label="Sections">
-    <div class="wrap">
-      <a href="#status" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="15.5" width="7" height="5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="11.5" width="7" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>Status</a>
-      <a href="#owed" data-tab="owed"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 8h6M9 10.6h6M9.6 8c3.6 0 3.6 5.2 0 5.2H9l5 4.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Owed</a>
-      <a href="#history" data-tab="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="4.6" cy="6.5" r="1.2" fill="currentColor"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor"/><circle cx="4.6" cy="17.5" r="1.2" fill="currentColor"/></svg>History</a>
-      <a href="#salary" data-tab="salary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h8l3.5 3.5v13.5h-11.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14.5 3.5V7H18M9.5 11.5h5.5M9.5 14.5h5.5M9.5 17.5h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Salary</a>
-    </div>
-  </nav>
+  </aside>
+  <main id="main"></main>
 </div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog"></aside>
+<div id="toast" hidden role="status" aria-live="polite"></div>
 
-<script type="application/json" id="source">{"kind":"dropbox","appKey":"48f76egnljmhzf5","file":"/budget.json","redirect":"https://stormnwheel-coder.github.io/ledger/","api":"https://api.dropboxapi.com","content":"https://content.dropboxapi.com","www":"https://www.dropbox.com"}</script>
-<script>
-"use strict";
-/* ===== model.mjs, pasted in by build-phone.mjs ===== */
-/*
- * budgetTracker -- the rules.
- *
- * Every figure the app shows is worked out here, from the data file alone.
- * Both views use this one file: render.mjs (the PDF) imports it, and
- * build-phone.mjs pastes it into the phone app, so the two can never
- * disagree about a balance. HANDOVER.md §2 states the rules in words.
- *
- * Keep it plain: no Node APIs and no browser APIs, only functions over the
- * data. Every export is a "function" or "const" declaration at the start of
- * a line, because build-phone.mjs strips the word "export" to inline it.
- */
+<script type="application/json" id="config">{"kind":"dropbox","appKey":"48f76egnljmhzf5","file":"/budget.json","redirect":"https://stormnwheel-coder.github.io/ledger/","api":"https://api.dropboxapi.com","content":"https://content.dropboxapi.com","www":"https://www.dropbox.com"}</script>
+<script type="module">
+import {
+  localYmd, pad, MON, MONTH, parts, daysBetween, dShort, dLong, dFull, monthName, fyStart, fyLabel, days,
+  IN0, IN2, rs, bare, sum, rupees, estimated, approx, chargedOn, byDate, stage, standing, esc,
+  problems, RE_DATE, RE_MONTH, gross, net, ofKind, creditGap, buildModel,
+  diffDocs, applyChanges, invert, entryKey, findEntry, sameEntry,
+} from "./model.js?v=Ok7HKjjFO";
+import { store } from "./store.js?v=Ok7HKjjFO";
 
-/* ------------------------------------------------------------------ *
- * Dates. Every date in the data is a "YYYY-MM-DD" string and is only
- * ever compared as a string or converted through UTC, so no time zone
- * can shift a day. "Today" comes from local time, never toISOString().
- * ------------------------------------------------------------------ */
-const pad = n => String(n).padStart(2, "0");
-const localYmd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const PHONE = store.kind === "phone";
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August",
-  "September", "October", "November", "December"];
-const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const parts = s => s.split("-").map(Number);
-const dayNo = s => { const [y, m, d] = parts(s); return Date.UTC(y, m - 1, d) / 864e5; };
-const daysBetween = (a, b) => dayNo(b) - dayNo(a);
-const dShort = s => { const [, m, d] = parts(s); return `${d} ${MON[m - 1]}`; };
-const dLong = s => { const [y, m, d] = parts(s); return `${d} ${MON[m - 1]} ${y}`; };
-const dFull = s => {
-  const [y, m, d] = parts(s);
-  return `${WEEKDAY[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${d} ${MONTH[m - 1]} ${y}`;
-};
-const monthName = ym => { const [y, m] = parts(ym); return `${MONTH[m - 1]} ${y}`; };
-/* The Indian financial year runs April to March. */
-const fyStart = s => { const [y, m] = parts(s); return `${m >= 4 ? y : y - 1}-04-01`; };
-const fyLabel = s => { const y = Number(fyStart(s).slice(0, 4)); return `${y}–${String(y + 1).slice(2)}`; };
-const days = n => (n === 1 ? "1 day" : `${n} days`);
-
-/* ------------------------------------------------------------------ *
- * Money. Budgets are in rupees. An expense in another currency carries
- * its foreign amount and a rate; its rupee figure is the one fixed for
- * reimbursement, and until that is known it is estimated at the rate
- * and shown with "≈".
- * ------------------------------------------------------------------ */
-const IN0 = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
-const IN2 = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const rs = n => (n < 0 ? "−₹" : "₹") + IN0.format(Math.abs(Math.round(n)));
-const bare = n => IN0.format(Math.round(n));
-const sum = (xs, f = x => x) => xs.reduce((a, x) => a + f(x), 0);
-
-const rupees = e => e.inr ?? Math.round(e.foreign.amount * e.foreign.rate);
-const estimated = e => e.inr == null;
-const approx = (n, est) => (est ? "≈ " : "") + rs(n);
-/* The date an expense reached the head's books: when you were reimbursed,
-   or when the institute charged it directly. Null while still on its way. */
-const chargedOn = e => (e.paidBy === "me" ? e.reimbursed : e.charged) || null;
-const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-/* Where an expense stands: settled (reimbursed or charged), waiting (claimed,
-   or booked by the institute and not yet charged) or toclaim (you paid and
-   have not claimed). */
-const stage = e => (e.paidBy === "me"
-  ? (e.reimbursed ? "settled" : e.claimed ? "waiting" : "toclaim")
-  : (e.charged ? "settled" : "waiting"));
-/* The same, in words, as [icon kind, text]. Icon kinds: good, wait, todo. */
-function standing(e, today) {
-  if (e.paidBy === "me") {
-    if (e.reimbursed) return ["good", `Reimbursed ${dShort(e.reimbursed)}`];
-    if (e.claimed) return ["wait", `Claimed ${dShort(e.claimed)}, waiting ${days(daysBetween(e.claimed, today))}`];
-    return ["todo", "Not claimed yet"];
-  }
-  return e.charged ? ["good", `Charged ${dShort(e.charged)}`] : ["wait", "Not charged yet"];
-}
-
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-
-/* ------------------------------------------------------------------ *
- * Checks. No view draws from a file it cannot trust, and the laptop
- * never writes one that fails. Every field is checked, and a field
- * not listed here is refused, so a typo fails at once instead of
- * living in the file. HANDOVER.md §1 describes each field.
- * ------------------------------------------------------------------ */
-const RE_DATE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
-const RE_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
-const RE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
-const FIELDS = {
-  file: ["version", "sample", "_note", "heads", "statements", "expenses", "payslips"],
-  head: ["id", "name", "code", "kind", "total", "validTill", "usedFor", "closed"],
-  statement: ["head", "asOn", "balance", "source"],
-  expense: ["id", "head", "date", "item", "purpose", "paidBy", "inr", "foreign", "claimed", "reimbursed", "charged"],
-  foreign: ["currency", "amount", "rate"],
-  payslip: ["month", "earnings", "deductions", "credited", "file"],
-  earning: ["label", "amount"],
-  deduction: ["label", "amount", "kind"],
-  credited: ["date", "amount"],
-};
-function problems(d) {
-  const bad = [];
-  const obj = v => v && typeof v === "object" && !Array.isArray(v);
-  const num = v => typeof v === "number" && Number.isFinite(v);
-  const text = v => typeof v === "string" && v.trim() !== "";
-  const date = v => typeof v === "string" && RE_DATE.test(v);
-  const optText = v => v == null || typeof v === "string";
-  const optDate = v => v == null || date(v);
-  const only = (o, kind, at) => { for (const k of Object.keys(o)) if (!FIELDS[kind].includes(k)) bad.push(`${at}: unexpected field "${k}"`); };
-  if (!obj(d)) return ["the file is not a JSON object"];
-  only(d, "file", "file");
-  for (const k of ["heads", "statements", "expenses", "payslips"]) if (!Array.isArray(d[k])) bad.push(`"${k}" is not a list`);
-  if (bad.length) return bad;
-
-  const kinds = new Map();
-  d.heads.forEach((h, i) => {
-    const at = `head ${i + 1}${h?.id ? ` (${h.id})` : ""}`;
-    if (!obj(h)) return bad.push(`${at}: not an object`);
-    only(h, "head", at);
-    if (typeof h.id !== "string" || !RE_ID.test(h.id)) bad.push(`${at}: bad id`);
-    else if (kinds.has(h.id)) bad.push(`${at}: id used twice`);
-    if (!text(h.name)) bad.push(`${at}: no name`);
-    if (h.kind !== "finite" && h.kind !== "open") bad.push(`${at}: kind must be finite or open`);
-    if (!optText(h.code) || !optText(h.usedFor)) bad.push(`${at}: code and usedFor must be text`);
-    if (h.total != null && (!num(h.total) || h.kind !== "finite")) bad.push(`${at}: total must be a number, on a finite head`);
-    if (!optDate(h.validTill)) bad.push(`${at}: validTill must be a date`);
-    if (h.closed != null && typeof h.closed !== "boolean") bad.push(`${at}: closed must be true or false`);
-    kinds.set(h.id, h.kind);
-  });
-
-  const seenSt = new Set();
-  d.statements.forEach((s, i) => {
-    const at = `balance ${i + 1}${s?.asOn ? ` (${s.head}, ${s.asOn})` : ""}`;
-    if (!obj(s)) return bad.push(`${at}: not an object`);
-    only(s, "statement", at);
-    if (kinds.get(s.head) !== "finite") bad.push(`${at}: head must be a finite head`);
-    if (!date(s.asOn)) bad.push(`${at}: asOn must be a date`);
-    if (!num(s.balance)) bad.push(`${at}: balance must be a number`);
-    if (!optText(s.source)) bad.push(`${at}: source must be text`);
-    if (seenSt.has(s.head + s.asOn)) bad.push(`${at}: a second balance for the same head and date`);
-    seenSt.add(s.head + s.asOn);
-  });
-
-  const seenEx = new Set();
-  d.expenses.forEach((e, i) => {
-    const at = `expense ${i + 1}${e?.id ? ` (${e.id})` : ""}`;
-    if (!obj(e)) return bad.push(`${at}: not an object`);
-    only(e, "expense", at);
-    if (typeof e.id !== "string" || !RE_ID.test(e.id)) bad.push(`${at}: bad id`);
-    else if (seenEx.has(e.id)) bad.push(`${at}: id used twice`);
-    seenEx.add(e.id);
-    if (!kinds.has(e.head)) bad.push(`${at}: unknown head "${e.head}"`);
-    if (!date(e.date)) bad.push(`${at}: date must be a date`);
-    if (!text(e.item)) bad.push(`${at}: no item`);
-    if (!optText(e.purpose)) bad.push(`${at}: purpose must be text`);
-    if (e.paidBy !== "me" && e.paidBy !== "institute") bad.push(`${at}: paidBy must be me or institute`);
-    if (e.inr != null && !num(e.inr)) bad.push(`${at}: inr must be a number`);
-    if (e.foreign != null) {
-      if (!obj(e.foreign)) bad.push(`${at}: foreign must be an object`);
-      else {
-        only(e.foreign, "foreign", at + " foreign");
-        if (typeof e.foreign.currency !== "string" || !/^[A-Z]{3}$/.test(e.foreign.currency)) bad.push(`${at}: currency must be a three-letter code`);
-        if (!num(e.foreign.amount)) bad.push(`${at}: foreign amount must be a number`);
-        if (!num(e.foreign.rate) || e.foreign.rate <= 0) bad.push(`${at}: rate must be a positive number`);
-      }
-    }
-    if (e.inr == null && e.foreign == null) bad.push(`${at}: no rupee amount and no foreign amount`);
-    for (const k of ["claimed", "reimbursed", "charged"]) if (!optDate(e[k])) bad.push(`${at}: ${k} must be a date`);
-    if (e.paidBy === "me" && e.charged != null) bad.push(`${at}: "charged" is for institute bookings`);
-    if (e.paidBy === "institute" && (e.claimed != null || e.reimbursed != null)) bad.push(`${at}: "claimed" and "reimbursed" are for expenses you paid`);
-  });
-
-  const seenMonth = new Set();
-  d.payslips.forEach((p, i) => {
-    const at = `payslip ${i + 1}${p?.month ? ` (${p.month})` : ""}`;
-    if (!obj(p)) return bad.push(`${at}: not an object`);
-    only(p, "payslip", at);
-    if (typeof p.month !== "string" || !RE_MONTH.test(p.month)) bad.push(`${at}: month must be YYYY-MM`);
-    else if (seenMonth.has(p.month)) bad.push(`${at}: a second payslip for the same month`);
-    seenMonth.add(p.month);
-    for (const [k, kind] of [["earnings", "earning"], ["deductions", "deduction"]]) {
-      if (!Array.isArray(p[k])) { bad.push(`${at}: ${k} is not a list`); continue; }
-      p[k].forEach((x, j) => {
-        if (!obj(x)) return bad.push(`${at} ${k} ${j + 1}: not an object`);
-        only(x, kind, `${at} ${k} ${j + 1}`);
-        if (!text(x.label) || !num(x.amount)) bad.push(`${at} ${k} ${j + 1}: needs a label and an amount`);
-        if (kind === "deduction" && !["tax", "retirement", "other"].includes(x.kind)) bad.push(`${at} ${k} ${j + 1}: kind must be tax, retirement or other`);
-      });
-    }
-    if (p.credited != null) {
-      if (!obj(p.credited)) bad.push(`${at}: credited must be an object`);
-      else {
-        only(p.credited, "credited", at + " credited");
-        if (!date(p.credited.date) || !num(p.credited.amount)) bad.push(`${at}: credited needs a date and an amount`);
-      }
-    }
-    if (!optText(p.file)) bad.push(`${at}: file must be text`);
-  });
-  return bad;
-}
-function validate(d) {
-  const bad = problems(d);
-  if (bad.length) throw new Error("data file has problems:\n  " + bad.slice(0, 20).join("\n  ") + (bad.length > 20 ? `\n  … and ${bad.length - 20} more` : ""));
-}
-
-/* ------------------------------------------------------------------ *
- * The model: everything a view shows, computed once.
- * ------------------------------------------------------------------ */
-function finiteHead(h, d, today) {
-  const sts = d.statements.filter(s => s.head === h.id).sort((a, b) => (a.asOn < b.asOn ? -1 : 1));
-  const exps = d.expenses.filter(e => e.head === h.id).sort(byDate);
-  const last = sts.at(-1) || null;
-
-  // Each statement is checked against the one before it, less what was charged in between.
-  const checks = sts.slice(1).map((s, i) => {
-    const prev = sts[i];
-    const between = exps.filter(e => { const c = chargedOn(e); return c && c > prev.asOn && c <= s.asOn; });
-    const expected = prev.balance - sum(between, rupees);
-    return { statement: s, prev, expected, gap: s.balance - expected };
-  });
-
-  // Available = the latest balance from accounts, less everything not yet in it.
-  // With neither a balance nor a total there is nothing to subtract from, so
-  // available is unknown (null), not a negative number.
-  const pending = exps.filter(e => { const c = chargedOn(e); return !(last && c && c <= last.asOn); });
-  const base = last ? last.balance : (h.total ?? null);
-  const available = base == null ? null : base - sum(pending, rupees);
-  const usedShare = h.total && available != null ? (h.total - available) / h.total : null;
-  const left = h.validTill ? daysBetween(today, h.validTill) : null;
-
-  const flags = [];
-  if (!last) flags.push(["warn", "No balance from accounts entered yet"]);
-  if (available != null && available < 0) flags.push(["crit", `Overspent by ${rs(-available)}`]);
-  else if (usedShare >= 0.8) flags.push(["warn", `Running low: ${Math.round(usedShare * 100)}% used`]);
-  if (left != null && left < 0) flags.push(["crit", `Ended ${dLong(h.validTill)}`]);
-  else if (left != null && left <= 90 && h.total && available != null && available / h.total > 0.25)
-    flags.push(["warn", `Ends in ${days(left)} with ${Math.round((available / h.total) * 100)}% unspent`]);
-  const lastCheck = checks.at(-1);
-  if (lastCheck && Math.round(lastCheck.gap) !== 0)
-    flags.push(["warn", `${dShort(lastCheck.statement.asOn)} statement ${rs(Math.abs(lastCheck.gap))} ${lastCheck.gap < 0 ? "below" : "above"} expected`]);
-
-  const state = available == null ? "none" : available < 0 ? "crit" : usedShare >= 0.8 ? "warn" : "ok";
-  return { h, sts, exps, last, checks, pending, available, usedShare, left, flags, state,
-    est: pending.some(estimated) };
-}
-
-function openHead(h, d, today) {
-  const fy0 = fyStart(today);
-  const exps = d.expenses.filter(e => e.head === h.id).sort(byDate);
-  const fy = exps.filter(e => e.date >= fy0);
-  const byPurpose = new Map();
-  for (const e of fy) {
-    const k = e.purpose || "No purpose given";
-    const p = byPurpose.get(k) || { total: 0, est: false };
-    p.total += rupees(e);
-    p.est ||= estimated(e);
-    byPurpose.set(k, p);
-  }
-  const flags = [];
-  const missing = exps.filter(e => !e.purpose).length;
-  if (missing) flags.push(["warn", `${missing} expense${missing > 1 ? "s" : ""} with no purpose recorded`]);
-  return { h, exps, fy, total: sum(fy, rupees), est: fy.some(estimated), flags,
-    purposes: [...byPurpose].sort((a, b) => b[1].total - a[1].total) };
-}
-
-const gross = p => sum(p.earnings, x => x.amount);
-const net = p => gross(p) - sum(p.deductions, x => x.amount);
-const ofKind = (p, k) => sum(p.deductions.filter(x => x.kind === k), x => x.amount);
-const creditGap = p => (p.credited ? Math.round(p.credited.amount - net(p)) : null);
-
-/* A closed head (closed: true) is one no longer in use. Its entries stay in
-   the history and still count in "owed to you", but the summaries list only
-   the open heads, in `active`. `heads` keeps every head, for the ledgers. */
-function buildModel(d, today) {
-  const fy0 = fyStart(today);
-  const heads = d.heads.map(h => (h.kind === "finite" ? finiteHead(h, d, today) : openHead(h, d, today)));
-  const active = heads.filter(x => !x.h.closed);
-  const headName = Object.fromEntries(d.heads.map(h => [h.id, h.name]));
-
-  const mine = d.expenses.filter(e => e.paidBy === "me" && !e.reimbursed);
-  const claimed = mine.filter(e => e.claimed).sort((a, b) => (a.claimed < b.claimed ? -1 : 1));
-  const unclaimed = mine.filter(e => !e.claimed).sort(byDate);
-
-  const slips = [...d.payslips].sort((a, b) => (a.month < b.month ? -1 : 1));
-  const fySlips = slips.filter(p => p.month >= fy0.slice(0, 7));
-  const short = fySlips.filter(p => p.credited && creditGap(p) !== 0);
-
-  return { d, today, fy0, heads, active, headName, mine, claimed, unclaimed, slips, fySlips, short,
-    latest: slips.at(-1) || null };
-}
-
-/* ===== the app ===== */
-
-const SRC = JSON.parse(document.getElementById("source").textContent);
-const SEALED = SRC.kind === "sealed" ? SRC : null;
-const DBX = SRC.kind === "dropbox" ? SRC : null;
-const $ = s => document.querySelector(s);
-const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const TODAY = localYmd(new Date());
+const YESTERDAY = localYmd(new Date(Date.now() - 864e5));
+const clone = o => structuredClone(o);
+const newId = () => "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const ago = d => { const n = daysBetween(d, TODAY); return n <= 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`; };
+const fmtAvail = f => (f.available == null ? "not known yet" : approx(f.available, f.est));
+
+/* Amounts may be typed with Indian or Western commas: "1,48,900", "148900.50". */
+function parseAmount(s) {
+  const t = String(s ?? "").replace(/[₹,\s]/g, "");
+  if (!/^-?\d+(\.\d{1,2})?$/.test(t)) return null;
+  return Number(t);
+}
+const amtText = n => (n == null ? "" : Number.isInteger(n) ? IN0.format(n) : IN2.format(n));
 
 const ICON = {
   good: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="#0ca30c"/><path d="M3.4 6.2 5.2 8l3.4-3.7" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
@@ -590,682 +359,986 @@ const ICON = {
   wait: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.3V6l1.8 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
   todo: `<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2.2 1.6"/></svg>`,
 };
-const CHEV = `<svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const REFRESH = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.4A5.4 5.4 0 1 0 13.4 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.6 2.6v3.9H9.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const flagHtml = ([kind, text]) => `<div class="flag">${ICON[kind]}<span>${esc(text)}</span></div>`;
 
-/* Browser storage: one IndexedDB store of small records. Every call may
-   fail (private window, cleared data); callers then fall back to asking. */
-const STORE = { db: "budgetTracker", name: "keys" };
-function idb() {
-  return new Promise((res, rej) => {
-    const r = indexedDB.open(STORE.db, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore(STORE.name);
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
-}
-async function kv(mode, fn) {
-  try {
-    const db = await idb();
-    return await new Promise(res => {
-      const req = fn(db.transaction(STORE.name, mode).objectStore(STORE.name));
-      req.onsuccess = () => res({ ok: true, v: req.result });
-      req.onerror = () => res({ ok: false });
-    });
-  } catch { return { ok: false }; }
-}
-const kvGet = async id => (await kv("readonly", s => s.get(id))).v ?? null;
-const kvPut = async (id, v) => (await kv("readwrite", s => s.put(v, id))).ok;
-const kvDel = async id => (await kv("readwrite", s => s.delete(id))).ok;
+const SOURCES = ["Accounts office statement", "Email from accounts", "Project ledger", "Sanction letter", "Allocation for the year"];
 
 /* ------------------------------------------------------------------ *
- * Unlocking ("sealed" mode, the sample). The data is AES-256-GCM under a
- * key derived from the passphrase (PBKDF2-SHA256). Once derived, the key
- * -- never the passphrase -- can be kept in IndexedDB as a
- * non-extractable CryptoKey, so the next visit opens without asking.
+ * State, loading and saving
  * ------------------------------------------------------------------ */
-const keyGet = () => kvGet("phone");
-const keyPut = v => kvPut("phone", v);
-const keyDel = () => kvDel("phone");
-
-async function deriveKey(pass) {
-  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass.normalize("NFC")), "PBKDF2", false, ["deriveKey"]);
-  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(SEALED.salt), iterations: SEALED.iter, hash: "SHA-256" },
-    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-}
-async function unseal(key) {
-  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(SEALED.iv) }, key, b64(SEALED.ct));
-  return JSON.parse(new TextDecoder().decode(plain));
-}
-
-function showLock(message = "", isError = false) {
-  $("#app").hidden = true;
-  $("#lock").hidden = false;
-  const m = $("#msg");
-  m.textContent = message;
-  m.className = "msg" + (isError ? " err" : "");
-}
-
-async function startSealed() {
-  if (!window.crypto?.subtle) return showLock("This browser cannot open locked data here. Open the page over https.", true);
-  const saved = await keyGet();
-  if (saved && saved.salt === SEALED.salt) {
-    try { return show(await unseal(saved.key)); } catch { await keyDel(); }
-  }
-  showLock();
-}
-
-$("#lockForm").addEventListener("submit", async ev => {
-  ev.preventDefault();
-  const btn = $("#unlockBtn");
-  btn.disabled = true;
-  showLock("Unlocking…");
-  let key, payload;
-  try {
-    key = await deriveKey($("#pass").value);
-    payload = await unseal(key);
-  } catch {
-    btn.disabled = false;
-    return showLock("That passphrase does not open this data. Check it and try again.", true);
-  }
-  let note = "";
-  if ($("#remember").checked && !(await keyPut({ salt: SEALED.salt, key })))
-    note = "This browser would not keep the key, so it will ask again next time.";
-  $("#pass").value = "";
-  btn.disabled = false;
-  show(payload, note);
-});
-
-$("#lockBtn").addEventListener("click", async () => {
-  if (DBX) return signOut();
-  await keyDel();
-  M = null;
-  $("#view").innerHTML = "";
-  showLock("Locked. The key is no longer kept on this phone.");
-});
-
-const fill = $("#fillHint");
-if (fill) fill.addEventListener("click", () => { $("#pass").value = fill.dataset.v; $("#pass").focus(); });
-
-/* ------------------------------------------------------------------ *
- * Reading from Dropbox ("dropbox" mode, the real app). The page holds no
- * figures. It signs in to Dropbox once (OAuth with PKCE, so no app secret
- * is needed), keeps the refresh token in IndexedDB, and reads one file
- * from the app's own Dropbox folder, the only place it is allowed to look,
- * and only to read. The last good copy is kept too, so the app opens at
- * once and works offline; every open checks Dropbox for a newer one.
- * ------------------------------------------------------------------ */
-const PKCE = "budgetTracker-pkce";
-let auth = null, copy = null, problem = null, checking = false, signInNote = "";
-
-class DbxError extends Error {
-  // kind: "net" (no answer), "signedout", "missing" (no such file), "bad" (unreadable file)
-  constructor(kind, message) { super(message); this.kind = kind; }
-}
-const b64url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const hhmm = t => { const d = new Date(t); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
-const localStamp = iso => `${localYmd(new Date(iso))} ${hhmm(iso)}`;
-const when = t => `${localYmd(new Date(t)) === TODAY ? "today" : dLong(localYmd(new Date(t)))}, ${hhmm(t)}`;
-
-async function tokenCall(params) {
-  let r;
-  try { r = await fetch(DBX.api + "/oauth2/token", { method: "POST", body: new URLSearchParams({ client_id: DBX.appKey, ...params }) }); }
-  catch { throw new DbxError("net", "no connection"); }
-  const j = await r.json().catch(() => ({}));
-  if (r.status === 400 || r.status === 401) throw new DbxError("signedout", j.error_description || j.error || `Dropbox answered ${r.status}`);
-  if (!r.ok || !j.access_token) throw new DbxError("net", `Dropbox answered ${r.status}`);
-  return j;
-}
-
-async function accessToken(force) {
-  if (!force && auth.access && auth.expiresAt > Date.now()) return auth.access;
-  const t = await tokenCall({ grant_type: "refresh_token", refresh_token: auth.refresh });
-  auth = { ...auth, access: t.access_token, expiresAt: Date.now() + (t.expires_in - 300) * 1000 };
-  await kvPut("dropbox", auth);
-  return auth.access;
-}
-
-async function dbx(host, path, init, retried = false) {
-  const token = await accessToken(retried);
-  let r;
-  try { r = await fetch(host + path, { method: "POST", ...init, headers: { Authorization: "Bearer " + token, ...init.headers } }); }
-  catch { throw new DbxError("net", "no connection"); }
-  if (r.status === 401 && !retried) return dbx(host, path, init, true);
-  if (r.status === 401) throw new DbxError("signedout", "Dropbox no longer accepts this phone's sign-in");
-  if (r.status === 409) {
-    const j = await r.json().catch(() => ({}));
-    throw new DbxError(/not_found/.test(j.error_summary || "") ? "missing" : "bad", j.error_summary || "Dropbox error");
-  }
-  if (!r.ok) throw new DbxError("net", `Dropbox answered ${r.status}`);
-  return r;
-}
-
-async function signIn() {
-  const verifier = b64url(crypto.getRandomValues(new Uint8Array(32)));
-  const challenge = b64url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
-  const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
-  try { localStorage.setItem(PKCE, JSON.stringify({ verifier, state })); }
-  catch { return showConnect("This browser is refusing storage, so it cannot stay signed in. Turn off private browsing and try again."); }
-  location.href = DBX.www + "/oauth2/authorize?" + new URLSearchParams({ client_id: DBX.appKey, response_type: "code",
-    token_access_type: "offline", code_challenge: challenge, code_challenge_method: "S256", redirect_uri: DBX.redirect, state });
-}
-
-/* Back from Dropbox's sign-in page with ?code= (or ?error=). */
-async function finishSignIn(q) {
-  let saved = null;
-  try { saved = JSON.parse(localStorage.getItem(PKCE)); localStorage.removeItem(PKCE); } catch {}
-  history.replaceState(null, "", location.pathname + location.hash);
-  if (q.get("error")) return showConnect(`Dropbox did not sign you in (${q.get("error_description") || q.get("error")}).`), false;
-  if (!saved || saved.state !== q.get("state")) return showConnect("That sign-in did not match this page. Please try again."), false;
-  try {
-    const t = await tokenCall({ grant_type: "authorization_code", code: q.get("code"), code_verifier: saved.verifier, redirect_uri: DBX.redirect });
-    if (!t.refresh_token) throw new DbxError("signedout", "Dropbox gave no lasting sign-in");
-    auth = { refresh: t.refresh_token, access: t.access_token, expiresAt: Date.now() + (t.expires_in - 300) * 1000 };
-  } catch (e) { return showConnect(`Sign-in did not finish: ${e.message}.`), false; }
-  if (!(await kvPut("dropbox", auth))) signInNote = "This browser would not keep the sign-in, so it will ask again next time.";
-  return true;
-}
-
-async function signOut() {
-  if (auth) {
-    // Revoking the access token also cancels the refresh token behind it.
-    try { const token = await accessToken(); await fetch(DBX.api + "/2/auth/token/revoke", { method: "POST", headers: { Authorization: "Bearer " + token } }); } catch {}
-  }
-  auth = null; copy = null; problem = null; M = null;
-  await kvDel("dropbox");
-  await kvDel("copy");
-  $("#view").innerHTML = "";
-  $("#notice").innerHTML = "";
-  showConnect();
-  $("#cmsg").textContent = "Signed out. Nothing from your budget is kept on this phone now.";
-}
-
-/* Ask Dropbox whether the file has changed, and fetch it if so. */
-async function check() {
-  if (checking || !auth) return;
-  checking = true;
-  if (M) stamp(); else showConnect();
-  try {
-    const meta = await (await dbx(DBX.api, "/2/files/get_metadata",
-      { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: DBX.file }) })).json();
-    const changed = !copy || meta.rev !== copy.rev;
-    if (changed) {
-      const text = await (await dbx(DBX.content, "/2/files/download", { headers: { "Dropbox-API-Arg": JSON.stringify({ path: DBX.file }) } })).text();
-      let data;
-      try { data = JSON.parse(text); validate(data); } catch (e) { throw new DbxError("bad", e.message); }
-      copy = { data, rev: meta.rev, modified: meta.client_modified, checked: Date.now() };
-    } else copy = { ...copy, checked: Date.now() };
-    await kvPut("copy", copy);
-    problem = null;
-    checking = false;
-    if (changed || !M) show({ data: copy.data, publishedAt: localStamp(copy.modified) }, signInNote);
-    else { stamp(); notice(); }
-    signInNote = "";
-  } catch (e) {
-    checking = false;
-    problem = e instanceof DbxError ? e : new DbxError("bad", String(e?.message || e));
-    if (problem.kind === "signedout") { auth = null; await kvDel("dropbox"); }
-    if (M) { stamp(); notice(); } else showConnect();
-  }
-}
-
-function showConnect(message) {
-  $("#app").hidden = true;
-  $("#lock").hidden = true;
-  $("#connect").hidden = false;
-  $("#signInBtn").hidden = !!auth;
-  $("#againBtn").hidden = !auth;
-  $("#againBtn").disabled = checking;
-  $("#signOutLink").hidden = !auth;
-  const text = message || (checking ? "Checking Dropbox…" : !problem ? "" : {
-    net: "Can't reach Dropbox. Check the connection and try again.",
-    signedout: "Dropbox has signed this phone out. Please sign in again.",
-    missing: "Signed in. There is no budget file in the app's Dropbox folder yet. It appears after your first entry on the laptop.",
-    bad: `The file in Dropbox could not be read: ${problem.message}`,
-  }[problem.kind]);
-  const m = $("#cmsg");
-  m.textContent = text;
-  m.className = "msg" + (message || (problem && problem.kind !== "missing" && !checking) ? " err" : "");
-}
-
-/* What went wrong on the last check, shown above the figures. */
-function notice() {
-  const n = $("#notice");
-  if (!DBX || !problem || !copy) { n.innerHTML = ""; return; }
-  const last = `Showing the copy checked ${when(copy.checked)}.`;
-  const text = {
-    net: `Can't reach Dropbox. ${last}`,
-    signedout: `Dropbox has signed this phone out. ${last}`,
-    missing: `The budget file is no longer in Dropbox. ${last}`,
-    bad: `The file in Dropbox could not be read (${problem.message}). Showing the last good copy.`,
-  }[problem.kind];
-  const act = problem.kind === "signedout" ? ` <button class="quiet" type="button" data-act="signin">Sign in again</button>` : "";
-  n.innerHTML = `<div class="panel flag${problem.kind === "net" ? " dim" : ""}">${ICON[problem.kind === "net" ? "wait" : "warn"]}<span>${esc(text)}${act}</span></div>`;
-}
-
-async function startDropbox() {
-  $("#lockLabel").textContent = "Sign out";
-  $("#lockBtn").setAttribute("aria-label", "Sign out of Dropbox, and forget the copy on this phone");
-  const q = new URLSearchParams(location.search);
-  if ((q.has("code") || q.has("error")) && !(await finishSignIn(q))) return;
-  auth = auth || await kvGet("dropbox");
-  copy = await kvGet("copy");
-  if (copy) show({ data: copy.data, publishedAt: localStamp(copy.modified) });
-  if (!auth) {
-    problem = copy ? new DbxError("signedout", "") : null;
-    return copy ? notice() : showConnect();
-  }
-  await check();
-}
-
-if (DBX) {
-  $("#signInBtn").addEventListener("click", signIn);
-  $("#againBtn").addEventListener("click", check);
-  $("#signOutLink").addEventListener("click", signOut);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && auth && Date.now() - (copy?.checked || 0) > 60000) check();
-  });
-  window.addEventListener("online", () => { if (auth) check(); });
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
-}
-
-/* ------------------------------------------------------------------ *
- * State and navigation. Views are named by a bare token in the hash
- * (#status, #owed, #history, #salary, #help, #h-<head id>) so the phone's
- * back button works. A trail of visited tokens lets "back" name where it
- * goes and restore that view's scroll position.
- * ------------------------------------------------------------------ */
-let M = null, PUB = null, current = null;
-const trail = [];
-const scrollAt = new Map();
-const ui = { stage: {}, hist: { q: "", head: "all", stage: "all" }, fy: null, slip: null };
-
-function show(payload, note = "") {
-  try { validate(payload.data); }
-  catch (e) { return SEALED ? showLock("The data in this page is damaged: " + e.message, true) : showConnect("The saved copy is damaged: " + e.message); }
-  M = buildModel(payload.data, TODAY);
-  PUB = payload.publishedAt;
-  $("#ribbon").hidden = !payload.data.sample;
-  stamp();
-  notice();
-  const first = $("#app").hidden;
-  $("#lock").hidden = true;
-  $("#connect").hidden = true;
-  $("#app").hidden = false;
-  if (first || !current || !known(current)) { trail.length = 0; route(); }
-  else { const y = window.scrollY; draw(); window.scrollTo(0, y); } // newer data while the app is open: stay put
-  if (note) toastNote(note);
-}
-
-/* "Updated" is when the figures were last saved: the build time for a
-   sealed page, the laptop's save time for the Dropbox file. */
-function stamp() {
-  const saved = `Updated ${dLong(PUB.slice(0, 10))}, ${PUB.slice(11, 16)}`;
-  if (DBX) {
-    $("#stamp").innerHTML = `<span>${saved}</span><button class="refresh" type="button" data-act="refresh" aria-label="Check Dropbox for a newer copy"${checking ? ' aria-busy="true" disabled' : ""}>${REFRESH}</button>`;
-    return;
-  }
-  const age = daysBetween(PUB.slice(0, 10), TODAY);
-  $("#stamp").innerHTML = `${age >= 7 ? ICON.warn : ""}<span>${saved}${age >= 7 ? ` · ${days(age)} ago` : ""}</span>`;
-}
-
-function toastNote(text) {
-  const v = $("#view .view");
-  if (v) v.insertAdjacentHTML("afterbegin", `<div class="panel flag dim">${ICON.wait}<span>${esc(text)}</span></div>`);
-}
-
-const headOf = tok => (tok.startsWith("h-") ? M.heads.find(x => "h-" + x.h.id === tok) : null);
-const known = tok => ["status", "owed", "history", "salary", "help"].includes(tok) || !!headOf(tok);
-const label = tok => ({ status: "Status", owed: "Owed to you", history: "History", salary: "Salary", help: "How to read this" })[tok]
-  || headOf(tok)?.h.name || "Status";
-const tabOf = tok => (["owed", "history", "salary"].includes(tok) ? tok : "status");
-
-function route() {
-  if (!M) return;
-  let tok = decodeURIComponent(location.hash.slice(1)) || "status";
-  if (!known(tok)) tok = "status";
-  if (current) scrollAt.set(current, window.scrollY);
-  const back = trail.at(-2) === tok;
-  if (back) trail.pop();
-  else if (trail.at(-1) !== tok) trail.push(tok);
-  current = tok;
-  draw();
-  window.scrollTo(0, back ? scrollAt.get(tok) || 0 : 0);
-}
-window.addEventListener("hashchange", route);
-
-document.addEventListener("click", ev => {
-  const tab = ev.target.closest("[data-tab]");
-  if (tab) {
-    trail.length = 0;
-    if (location.hash.slice(1) === tab.dataset.tab) { ev.preventDefault(); route(); }
-    return;
-  }
-  const a = ev.target.closest("[data-act]");
-  if (!a) return;
-  const { act, v, k } = a.dataset;
-  if (act === "signin") return void signIn();
-  if (act === "refresh") return void check();
-  const y = window.scrollY;
-  if (act === "stage") ui.stage[k] = v;
-  if (act === "hhead") ui.hist.head = v;
-  if (act === "hstage") ui.hist.stage = v;
-  if (act === "fy") { ui.fy = v; ui.slip = null; }
-  if (act === "slip") ui.slip = v;
-  draw();
-  window.scrollTo(0, y);
-});
-
-function draw() {
-  const tok = current, f = headOf(tok);
-  const html = tok === "owed" ? owedView()
-    : tok === "history" ? historyView()
-    : tok === "salary" ? salaryView()
-    : tok === "help" ? helpView()
-    : f ? (f.h.kind === "finite" ? finiteView(f) : openView(f))
-    : statusView();
-  $("#view").innerHTML = `<div class="view">${html}</div>`;
-  for (const t of document.querySelectorAll("[data-tab]")) {
-    if (t.dataset.tab === tabOf(tok)) t.setAttribute("aria-current", "page");
-    else t.removeAttribute("aria-current");
-  }
-  document.title = tok === "status" ? "Budgets & pay" : `${label(tok)} · Budgets & pay`;
-  if (tok === "history") wireSearch();
-}
-
-const backLink = () => {
-  const to = trail.at(-2) || "status";
-  return `<a class="back" href="#${esc(to)}"><svg class="chev" viewBox="0 0 8 14" aria-hidden="true" style="transform:scaleX(-1);color:currentColor"><path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${esc(label(to))}</a>`;
+let S = { doc: null, etag: null, sample: false, missing: false, held: [] };
+let M = null;
+let browsingSample = false;
+let connectInfo = null; // the phone, not signed in or with nothing read yet: what to say
+const undoStack = []; // the changes each save made, newest last
+const ui = {
+  view: "overview", q: "", head: "all", stage: "all", fy: "all", salFy: null,
+  sel: { claim: new Set(), reimb: new Set(), charge: new Set() }, fixed: {},
+  last: { head: null, paidBy: "me", purpose: {} },
 };
 
+/* What the store calls: show(state) with a newer state (or, on the phone,
+   with { connect } when there is nothing to show yet), status() for the line
+   across the top, note() for a passing message, saved() for the status by
+   the menu, busy() while the phone is checking Dropbox. */
+const pageApi = {
+  show(st) {
+    if (st.connect) { connectInfo = st.connect; S = { doc: null, held: [] }; M = null; return render(); }
+    connectInfo = null;
+    adopt(st);
+    // The entry an open form is changing has just been changed somewhere else.
+    if (form?.opened && !stillAsOpened()) showBar("What this form is changing was just changed elsewhere. Close the form and open it again to see the change.", "warn");
+  },
+  status: (level, text, action) => showBar(text, level, action),
+  note: toast,
+  saved: setSaved,
+  busy(on) { for (const b of $$(".refresh")) b.toggleAttribute("aria-busy", on); },
+};
+const stillAsOpened = () => sameEntry(form.opened.kind, form.opened.entry, findEntry(S.doc, form.opened.kind, form.opened.key));
+/* A short fingerprint of the file's version, for the self-tests to watch. */
+const fingerprint = s => { let h = 2166136261; for (const c of String(s || "")) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };
+function adopt(st) {
+  S = { held: [], ...st };
+  M = S.doc ? buildModel(S.doc, TODAY) : null;
+  if (PHONE) browsingSample = !!S.sample; // the phone can only look at the sample
+  document.body.dataset.rev = fingerprint(S.etag);
+  if (S.phone) $("#phoneLink").href = S.phone;
+  setSaved(S.label || "", S.sample ? "busy" : "");
+  render();
+}
+
+/* Every save is the whole new file; the store saves the entries it changed.
+   If the file moved on since this page read it, the change is laid onto the
+   new version, and saved if it still fits. */
+async function commit(next, message, { isUndo = false } = {}) {
+  if (S.sample || browsingSample) { toast(PHONE ? "This is the SAMPLE, so nothing is saved." : "This is the SAMPLE, so nothing is saved. Start your real budget to make entries.", "crit"); return false; }
+  if (form?.opened && !stillAsOpened()) { toast("Not saved: what this form is changing was changed elsewhere while it was open. Close the form and open it again.", "crit"); return false; }
+  const changes = diffDocs(S.doc, next);
+  if (!changes.length) { toast("Nothing changed."); return true; }
+  setSaved("Saving…", "busy");
+  let r;
+  try {
+    r = await store.save(next, S.etag, message);
+    if (r.conflict) {
+      const re = applyChanges(r.state.doc, changes);
+      if (!re.conflicts.length && !problems(re.doc).length) r = await store.save(re.doc, r.state.etag, message);
+    }
+  } catch { return false; } // the laptop's server has stopped; the store has said so
+  if (r.conflict) {
+    adopt(r.state);
+    showBar("budget.json was changed outside this window, so the latest version has been loaded. Check that your last change is there, and make it again if not.", "warn");
+    return false;
+  }
+  if (!r.ok) { setSaved("Not saved", "bad"); toast(r.error || "Not saved.", "crit"); return false; }
+  if (!isUndo) undoStack.push(changes);
+  adopt(r.state);
+  setSaved(r.saved || `All changes saved · ${new Date().toTimeString().slice(0, 5)}`);
+  toast(message, "", !isUndo && undoStack.length > 0);
+  return true;
+}
+/* Undo takes back the last save's own changes, and nothing made since elsewhere. */
+async function undo() {
+  if (!undoStack.length) return toast("Nothing to undo.");
+  const r = applyChanges(S.doc, invert(undoStack.at(-1)));
+  if (r.conflicts.length) { undoStack.pop(); return toast("Can't undo: that entry has been changed since.", "crit"); }
+  if (await commit(r.doc, "Undone.", { isUndo: true })) undoStack.pop();
+}
+
+function setSaved(text, cls = "") { $("#savedText").textContent = text; $("#saved").className = cls; }
+function showBar(text, cls, action) {
+  const b = $("#bar");
+  b.hidden = !text;
+  b.className = cls || "";
+  b.innerHTML = text ? `<span>${esc(text)}</span>${action ? `<button type="button" data-act="${esc(action.act)}">${esc(action.label)}</button>` : ""}` : "";
+}
+let toastTimer;
+function toast(text, cls = "", withUndo = false) {
+  const t = $("#toast");
+  t.className = cls;
+  t.innerHTML = `<span>${esc(text)}</span>${withUndo ? `<button type="button" data-act="undo">Undo</button>` : ""}`;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.hidden = true), cls === "crit" ? 9000 : 6000);
+}
+
 /* ------------------------------------------------------------------ *
- * Pieces.
+ * Rendering
  * ------------------------------------------------------------------ */
-const flagHtml = ([kind, text]) => `<div class="flag">${ICON[kind]}<span>${esc(text)}</span></div>`;
-const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const VIEWS = ["overview", "expenses", "balances", "salary", "heads"];
+function render() {
+  document.body.classList.toggle("nodoc", !S.doc);
+  document.body.classList.toggle("connect", !!connectInfo);
+  $("#ribbon").hidden = !(S.sample && browsingSample);
+  document.body.classList.toggle("readonly", !!S.sample);
+  if (connectInfo) { $("#main").innerHTML = connectView(); return; }
+  if (!S.doc || (S.sample && !browsingSample)) { $("#main").innerHTML = startView(); return; }
+  const v = VIEWS.includes(ui.view) ? ui.view : "overview";
+  $("#main").innerHTML = { overview: overviewView, expenses: expensesView, balances: balancesView, salary: salaryView, heads: headsView }[v]();
+  for (const a of $$("[data-view]")) { if (a.dataset.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); }
+  const todo = M.unclaimed.length + M.claimed.length + uncharged().length;
+  $("#todoCount").hidden = !todo;
+  $("#todoCount").textContent = todo;
+  document.title = `${v[0].toUpperCase() + v.slice(1)} · Budgets & pay`;
+}
+const uncharged = () => S.doc.expenses.filter(e => e.paidBy === "institute" && !e.charged).sort(byDate);
+const headName = id => S.doc.heads.find(h => h.id === id)?.name || id;
+const pageHead = (title, sub, right = "") => `<div class="pagehead"><div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ""}</div>${right}</div>`;
+
+function startView() {
+  if (!store.starter) return `<div class="start card"><h1>No budget yet</h1>
+    <p>There is no budget file in Dropbox yet. Start your real budget in the laptop app; it shows here after that.</p></div>`;
+  const replacing = S.sample;
+  return `<div class="start card">
+    <h1>Start your real budget</h1>
+    <p>${replacing
+      ? "The phone is showing the invented <b>SAMPLE</b> at the moment. Starting replaces it with your own file, holding only the heads you tick below. The phone shows your real budget the next time it is opened."
+      : "There is no budget file yet. Starting creates one, holding only the heads you tick below."}
+      Every figure is yours to enter next: balances from accounts, expenses and payslips. Heads can be renamed, added or removed later.</p>
+    <form id="startForm">
+      ${store.starter.map((h, i) => `<label class="row"><input type="checkbox" name="h" value="${i}" checked>
+        <span><b>${esc(h.name)}</b>${h.code ? ` <span class="note">${esc(h.code)}</span>` : ""}${h.usedFor ? `<br><span class="note">${esc(h.usedFor)}</span>` : ""}</span>
+        <span class="kind">${h.kind === "finite" ? "has a budget" : "use-restricted, no limit"}</span></label>`).join("")}
+      <div class="btns">
+        <button class="primary" type="submit">Start my real budget</button>
+        ${replacing ? `<button class="ghost" type="button" data-act="browse">Look around the sample first</button>` : ""}
+      </div>
+    </form>
+  </div>`;
+}
+
+/* The phone, before anything can be shown. */
+function connectView() {
+  const c = connectInfo;
+  return `<div class="start card">
+    <h1>Budgets &amp; pay</h1>
+    <p>Your figures stay in your Dropbox. Sign in once and this phone stays signed in. The app can see only its own folder in your Dropbox, where your budget is kept.</p>
+    ${c.message ? `<p class="${c.isError ? "formerr" : "note"}" id="cmsg">${esc(c.message)}</p>` : ""}
+    <div class="btns">${c.signedIn
+      ? `<button class="primary" type="button" data-act="refresh" ${c.checking ? "disabled" : ""}>Check again</button><button class="ghost" type="button" data-act="signout">Sign out</button>`
+      : `<button class="primary" type="button" data-act="signin" id="signInBtn">Sign in with Dropbox</button>`}</div>
+  </div>`;
+}
+
+/* --- Changes from the phone that clash with the laptop's -------------- */
+function entryLabel(kind, x) {
+  try {
+    return kind === "expense" ? `“${x.item}”, ${approx(rupees(x), estimated(x))}` : kind === "head" ? `the head “${x.name}”`
+      : kind === "statement" ? `the ${headName(x.head)} balance of ${dShort(x.asOn)}` : `the ${monthName(x.month)} payslip`;
+  } catch { return "an entry"; } // a change file is checked, but this must never stop the page drawing
+}
+const madeText = iso => { const d = new Date(iso); return Number.isNaN(+d) ? "" : `${dShort(localYmd(d))}, ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+function heldCard() {
+  if (!S.held?.length) return "";
+  const row = h => {
+    const why = h.why === "conflict"
+      ? (h.conflicts || []).map(c => `<div class="sub">${esc(entryLabel(c.kind, c.after || c.before))}: ${c.current ? "changed on the laptop after the phone read it" : "deleted on the laptop after the phone read it"}.</div>`).join("")
+      : h.why === "invalid" ? `<div class="sub">It no longer fits the file: ${esc((h.problems || [])[0] || "")}.</div>`
+      : `<div class="sub">The file it came in could not be read (${esc((h.problems || [])[0] || "")}).</div>`;
+    const buttons = !store.decide ? "" : `<div class="chips" style="margin-top:6px">
+      ${h.why === "conflict" ? `<button class="mini" type="button" data-decide="apply" data-id="${esc(h.id)}">Use the phone's version</button>` : ""}
+      <button class="mini" type="button" data-decide="discard" data-id="${esc(h.id)}">${h.why === "conflict" ? "Keep the laptop's" : "Set it aside"}</button></div>`;
+    return `<div class="held-row"><b>${esc(h.note || "A change")}</b>${h.made ? ` <span class="note">made on the phone ${esc(madeText(h.made))}</span>` : ""}${why}${buttons}</div>`;
+  };
+  return `<section class="card held" id="held"><h2 class="sec" style="margin-top:0">From the phone: needs a decision <span>${plural(S.held.length, "change")}</span></h2>
+    ${S.held.map(row).join("")}${store.decide ? "" : `<div class="note" style="margin-top:6px">Open the laptop app to decide.</div>`}</section>`;
+}
+
+/* --- Overview ------------------------------------------------------ */
+function gettingStarted() {
+  const finite = S.doc.heads.filter(h => h.kind === "finite" && !h.closed);
+  const noBal = finite.filter(h => !S.doc.statements.some(s => s.head === h.id));
+  const steps = [
+    [!noBal.length, `Enter the latest balance from accounts for each budget head${noBal.length ? ` (${noBal.length} of ${finite.length} still to do)` : ""}.`,
+      noBal.length ? `<div class="chips">${noBal.map(h => `<button class="chip" type="button" data-new="balance" data-head="${esc(h.id)}">+ ${esc(h.name)}</button>`).join("")}</div>` : ""],
+    [S.doc.expenses.length > 0, "Enter the expenses that are not in those balances yet: claims you are waiting on, things not claimed yet, and institute bookings not yet charged. Older, settled ones are optional, for the record.",
+      `<div class="chips"><button class="chip" type="button" data-new="expense">+ Expense</button></div>`],
+    [S.doc.payslips.length > 0, "Add your latest payslip.", `<div class="chips"><button class="chip" type="button" data-new="payslip">+ Payslip</button></div>`],
+  ];
+  if (steps.every(s => s[0])) return "";
+  return `<div class="card" style="margin-bottom:16px"><h2 class="sec" style="margin-top:0">Getting started</h2><div class="steps">${steps.map(([ok, text, extra]) =>
+    `<div class="st${ok ? " ok" : ""}">${ok ? ICON.good : ICON.todo}<div>${esc(text)}${ok ? "" : extra}</div></div>`).join("")}</div></div>`;
+}
+
+const LISTS = {
+  claim: { title: "Claim these", sub: "You paid, and have not claimed yet", field: "claimed", verb: "Mark claimed", done: "claimed",
+    rows: () => M.unclaimed, when: e => `paid ${ago(e.date)}`, empty: "Nothing to claim." },
+  reimb: { title: "Waiting to be reimbursed", sub: "Claimed, not paid back yet. Oldest claim first.", field: "reimbursed", verb: "Mark reimbursed", done: "reimbursed",
+    rows: () => M.claimed, when: e => (e.claimed === TODAY ? "claimed today" : `claimed ${dShort(e.claimed)}, waiting ${days(daysBetween(e.claimed, TODAY))}`), empty: "Nothing waiting." },
+  charge: { title: "Institute bookings not charged yet", sub: "Booked through the institute, not yet charged to the head", field: "charged", verb: "Mark charged", done: "charged",
+    rows: uncharged, when: e => `booked ${ago(e.date)}`, empty: "Nothing outstanding." },
+};
+
+function actCard(key) {
+  const L = LISTS[key], rows = L.rows(), sel = ui.sel[key];
+  for (const id of sel) if (!rows.some(e => e.id === id)) sel.delete(id);
+  const total = approx(sum(rows, rupees), rows.some(estimated));
+  if (!rows.length) return `<section class="card act-card" id="list-${key}"><header><div><h3>${L.title}</h3></div></header><div class="done">${ICON.good}${L.empty}</div></section>`;
+  const picked = rows.filter(e => sel.has(e.id));
+  return `<section class="card act-card" id="list-${key}">
+    <header><div><h3>${L.title}<span class="count">${plural(rows.length, "item")} · ${total}</span></h3><p>${L.sub}</p></div></header>
+    <table class="t t-act"><thead><tr><th class="ck"><input type="checkbox" data-all="${key}" aria-label="Select all" ${picked.length === rows.length ? "checked" : ""}></th>
+      <th class="ph">Select all</th><th class="dt">Date</th><th class="dt">Head</th><th class="dt">Item</th><th class="r dt">Amount</th><th class="act dt"></th></tr></thead>
+    <tbody>${rows.map(e => `<tr data-edit="${esc(e.id)}">
+      <td class="ck"><input type="checkbox" data-pick="${key}" value="${esc(e.id)}" ${sel.has(e.id) ? "checked" : ""} aria-label="Select ${esc(e.item)}"></td>
+      <td class="nowrap dt">${dShort(e.date)}</td><td class="nowrap dt">${esc(headName(e.head))}</td>
+      <td>${esc(e.item)}<div class="sub"><span class="ph">${dShort(e.date)} · ${esc(headName(e.head))} · </span>${e.purpose ? `${esc(e.purpose)} · ` : ""}${L.when(e)}${e.foreign ? ` · ${esc(e.foreign.currency)} ${IN2.format(e.foreign.amount)}` : ""}</div>
+        ${key === "reimb" && estimated(e) ? `<label class="fix">Rupee amount paid back ₹ <input data-fix="${esc(e.id)}" inputmode="decimal" value="${esc(ui.fixed[e.id] || "")}" placeholder="≈ ${bare(rupees(e))}"></label>` : ""}</td>
+      <td class="r c-amt">${estimated(e) ? "≈ " : ""}${rs(rupees(e))}</td>
+      <td class="r c-act"><button class="mini hov" type="button" data-quick="${key}" data-id="${esc(e.id)}">${L.done[0].toUpperCase() + L.done.slice(1)} today</button></td>
+    </tr>`).join("")}</tbody></table>
+    <div class="bulk" ${picked.length ? "" : "hidden"}><b>${picked.length} selected</b> · ${approx(sum(picked, rupees), picked.some(estimated))}
+      <span>· ${L.verb.toLowerCase()} on</span><input type="date" data-bulkdate="${key}" value="${TODAY}" max="${TODAY}">
+      <button class="primary" type="button" data-bulk="${key}">${L.verb}</button>
+      <button class="link" type="button" data-clear="${key}">Clear</button></div>
+  </section>`;
+}
 
 function meter(f) {
   if (f.usedShare == null) return "";
   const w = Math.max(0, Math.min(100, f.usedShare * 100));
-  return `<div class="meter ${f.state}" role="img" aria-label="${Math.round(f.usedShare * 100)}% used"><i style="width:${w.toFixed(1)}%"></i></div>`;
+  return `<div class="meter ${f.state}"><i style="width:${w.toFixed(1)}%"></i></div>`;
 }
-function meta(f, long = false) {
-  const used = f.usedShare == null ? "" : `${Math.max(0, Math.round(f.usedShare * 100))}% used of ${rs(f.h.total)}`;
-  const end = !f.h.validTill ? "no end date"
-    : f.left < 0 ? `ended ${dLong(f.h.validTill)}`
-    : `ends ${dLong(f.h.validTill)}${long ? `, in ${days(f.left)}` : ""}`;
-  return `<div class="meta"><span>${used}</span><span>${end}</span></div>`;
+function headCard(f) {
+  const h = f.h;
+  if (h.kind === "open") {
+    return `<div class="card hcard" data-goto="balances" data-head="${esc(h.id)}">
+      <div class="top"><span class="name">${esc(h.name)}</span><span class="meta">${plural(f.fy.length, "item")}</span></div>
+      <div class="big">${approx(f.total, f.est)}</div><div class="lbl">spent in FY ${fyLabel(TODAY)}</div>
+      ${f.purposes.slice(0, 3).map(([p, x]) => `<div class="meta">${esc(p)} · ${approx(x.total, x.est)}</div>`).join("")}
+      ${f.flags.map(flagHtml).join("")}</div>`;
+  }
+  const used = f.usedShare == null ? "" : `${Math.max(0, Math.round(f.usedShare * 100))}% used of ${rs(h.total)}`;
+  const end = h.validTill ? `ends ${dLong(h.validTill)}` : "";
+  return `<div class="card hcard" data-goto="balances" data-head="${esc(h.id)}">
+    <div class="top"><span class="name">${esc(h.name)}${h.code ? `<span class="code">${esc(h.code)}</span>` : ""}</span></div>
+    <div class="big">${f.available == null ? "—" : approx(f.available, f.est)}</div><div class="lbl">available now</div>
+    ${meter(f)}<div class="meta">${[used, end].filter(Boolean).join(" · ")}</div>
+    ${f.flags.map(flagHtml).join("")}
+    <div class="meta">${f.last ? `Last balance from accounts ${rs(f.last.balance)}, ${dShort(f.last.asOn)}` : ""}</div></div>`;
 }
 
-function foreignLine(e) {
-  if (!e.foreign) return "";
-  const f = `${esc(e.foreign.currency)} ${IN2.format(e.foreign.amount)}`;
-  return estimated(e)
-    ? `<div class="sub">${f} · rupee amount not fixed yet, estimated at ₹${IN2.format(e.foreign.rate)}</div>`
-    : `<div class="sub">${f} at ₹${IN2.format(e.foreign.rate)}</div>`;
-}
-
-function txRow(e, { purpose = false, head = false, extra = "" } = {}) {
-  const [kind, words] = standing(e, TODAY);
-  return `<div class="tx">
-    <div class="line"><span class="item">${esc(e.item)}</span><span class="amt">${approx(rupees(e), estimated(e))}</span></div>
-    <div class="sub">${dShort(e.date)} · ${e.paidBy === "me" ? "You paid" : "Institute paid"} · ${ICON[kind]}${esc(words)}</div>
-    ${head ? `<div class="sub">${esc(M.headName[e.head])}${extra}</div>` : ""}
-    ${purpose && e.purpose ? `<div class="sub purpose">${esc(e.purpose)}</div>` : ""}
-    ${foreignLine(e)}
+function overviewView() {
+  const owed = sum(M.mine, rupees), p = M.latest;
+  const oldest = M.claimed[0];
+  const tiles = `<div class="tiles">
+    <button class="tile hero" type="button" data-scroll="list-claim"><div class="k">Owed to you</div><div class="v">${approx(owed, M.mine.some(estimated))}</div>
+      <div class="s">${rs(sum(M.claimed, rupees))} claimed · ${approx(sum(M.unclaimed, rupees), M.unclaimed.some(estimated))} not claimed</div></button>
+    <button class="tile" type="button" data-scroll="list-claim"><div class="k">To claim</div><div class="v">${M.unclaimed.length}</div><div class="s">${M.unclaimed.length ? `oldest paid ${ago(M.unclaimed[0].date)}` : "all claimed"}</div></button>
+    <button class="tile" type="button" data-scroll="list-reimb"><div class="k">Waiting for reimbursement</div><div class="v">${M.claimed.length}</div><div class="s">${!oldest ? "none waiting" : oldest.claimed === TODAY ? "claimed today" : `longest ${days(daysBetween(oldest.claimed, TODAY))}`}</div></button>
+    <button class="tile" type="button" data-scroll="list-charge"><div class="k">Bookings not charged</div><div class="v">${uncharged().length}</div><div class="s">${approx(sum(uncharged(), rupees), uncharged().some(estimated))}</div></button>
   </div>`;
+  const finite = M.active.filter(x => x.h.kind === "finite"), open = M.active.filter(x => x.h.kind === "open");
+  const salary = !p ? `<div class="card"><span class="note">No payslips yet.</span> <button class="link" type="button" data-new="payslip">+ Add your latest payslip</button></div>`
+    : `<div class="card hcard" data-goto="salary"><div class="top"><span class="name">${monthName(p.month)}</span><span class="meta">take-home</span></div>
+        <div class="big">${rs(net(p))}</div>
+        ${flagHtml(creditGap(p) == null ? ["wait", "Bank credit not entered"] : creditGap(p) === 0 ? ["good", `Credited ${dShort(p.credited.date)}, matches the payslip`] : ["warn", `Credited ${rs(p.credited.amount)}; the payslip says ${rs(net(p))}`])}
+        <div class="meta">FY ${fyLabel(TODAY)} so far: gross ${rs(sum(M.fySlips, gross))} · income tax ${rs(sum(M.fySlips, x => ofKind(x, "tax")))}</div></div>`;
+  return `${pageHead("Overview", dFull(TODAY) + ` · FY ${fyLabel(TODAY)}`)}
+    ${heldCard()}${gettingStarted()}${tiles}
+    <h2 class="sec">Needs action <span>tick several to mark them together</span></h2>
+    <div class="stack">${actCard("claim")}${actCard("reimb")}${actCard("charge")}</div>
+    <h2 class="sec">Budgets <span>available now · <a class="link" href="#heads">add or close heads</a></span></h2>
+    <div class="grid">${finite.map(headCard).join("") || `<div class="note">No budget heads.</div>`}</div>
+    <h2 class="sec">Use-restricted <span>FY ${fyLabel(TODAY)}</span></h2>
+    <div class="grid">${open.map(headCard).join("") || `<div class="note">No use-restricted heads.</div>`}</div>
+    <h2 class="sec">Salary</h2><div class="grid">${salary}</div>`;
 }
 
-/* Newest first, with a month heading whenever the month changes. */
-function byMonth(items, drawOne) {
-  let month = null;
-  return items.map(it => {
-    const m = it.key.slice(0, 7);
-    const head = m !== month ? `<div class="mon">${monthName(m)}</div>` : "";
+/* --- Expenses ------------------------------------------------------ */
+function expensesView() {
+  const fys = [...new Set(S.doc.expenses.map(e => fyStart(e.date)))].sort().reverse();
+  const stages = [["all", "All"], ["toclaim", "To claim"], ["waiting", "Waiting"], ["settled", "Settled"]];
+  return `${pageHead("Expenses", "Click any row to change it.", `<button class="primary" type="button" data-new="expense">+ Expense</button>`)}
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="Search item, purpose, amount…  ( / )" value="${esc(ui.q)}">
+      <select id="fHead"><option value="all">All heads</option>${S.doc.heads.map(h => `<option value="${esc(h.id)}" ${ui.head === h.id ? "selected" : ""}>${esc(h.name)}${h.closed ? " (closed)" : ""}</option>`).join("")}</select>
+      <select id="fFy"><option value="all">All years</option>${fys.map(f => `<option value="${f}" ${ui.fy === f ? "selected" : ""}>FY ${fyLabel(f)}</option>`).join("")}</select>
+      <div class="chips">${stages.map(([v, t]) => `<button class="chip" type="button" data-stage="${v}" aria-pressed="${ui.stage === v}">${t}</button>`).join("")}</div>
+    </div>
+    <div class="card" style="padding:4px 8px" id="xbody">${expenseTable()}</div>`;
+}
+function expenseMatches() {
+  const words = ui.q.toLowerCase().split(/\s+/).filter(Boolean);
+  return S.doc.expenses.filter(e => {
+    if (ui.head !== "all" && e.head !== ui.head) return false;
+    if (ui.stage !== "all" && stage(e) !== ui.stage) return false;
+    if (ui.fy !== "all" && fyStart(e.date) !== ui.fy) return false;
+    const hay = [e.item, e.purpose, headName(e.head), e.foreign?.currency, String(rupees(e)), bare(rupees(e)), monthName(e.date.slice(0, 7))].join(" ").toLowerCase();
+    return words.every(w => hay.includes(w));
+  }).sort((a, b) => -byDate(a, b) || (a.id < b.id ? 1 : -1));
+}
+function expenseTable() {
+  const xs = expenseMatches();
+  if (!xs.length) return `<div class="empty" style="padding:14px 10px">${S.doc.expenses.length ? "Nothing matches." : "No expenses yet."}</div>`;
+  let month = "";
+  const rows = xs.map(e => {
+    const m = e.date.slice(0, 7);
+    const head = m !== month ? `<tr class="mon"><td colspan="6">${monthName(m)}</td></tr>` : "";
     month = m;
-    return head + drawOne(it);
+    const [kind, words] = standing(e, TODAY);
+    const quick = stage(e) === "toclaim" ? ["claim", "Claimed today"] : stage(e) === "waiting" ? (e.paidBy === "me" ? ["reimb", "Reimbursed today"] : ["charge", "Charged today"]) : null;
+    const sub = [e.purpose && esc(e.purpose), e.foreign && `${esc(e.foreign.currency)} ${IN2.format(e.foreign.amount)} at ₹${IN2.format(e.foreign.rate)}`].filter(Boolean).join(" · ");
+    return `${head}<tr data-edit="${esc(e.id)}">
+      <td class="nowrap dt">${dShort(e.date)}</td><td class="nowrap dt">${esc(headName(e.head))}</td>
+      <td>${esc(e.item)}<div class="sub"><span class="ph">${dShort(e.date)} · ${esc(headName(e.head))} · ${e.paidBy === "me" ? "you paid" : "institute paid"}${sub ? " · " : ""}</span>${sub}</div></td>
+      <td class="r c-amt">${estimated(e) ? "≈ " : ""}${rs(rupees(e))}</td>
+      <td class="nowrap dt">${e.paidBy === "me" ? "You" : "Institute"}</td>
+      <td class="c-wide"><span class="flag" style="margin:0">${ICON[kind]}<span>${esc(words)}</span></span>
+        ${quick ? `<button class="mini hov" type="button" data-quick="${quick[0]}" data-id="${esc(e.id)}" style="margin-top:4px">${quick[1]}</button>` : ""}</td></tr>`;
   }).join("");
+  return `<table class="t"><thead><tr><th>Date</th><th>Head</th><th>Item</th><th class="r">Amount</th><th>Paid by</th><th>Where it stands</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr><td colspan="3">${plural(xs.length, "expense")}</td><td class="r c-amt">${approx(sum(xs, rupees), xs.some(estimated))}</td><td colspan="2" class="dt"></td></tr></tfoot></table>`;
 }
 
-const STAGES = [["all", "All"], ["waiting", "Waiting"], ["toclaim", "To claim"], ["settled", "Settled"]];
-function stageChips(exps, chosen, act, k = "") {
-  return `<div class="chips" role="group" aria-label="Filter by status">${STAGES.map(([v, name]) => {
-    const n = v === "all" ? exps.length : exps.filter(e => stage(e) === v).length;
-    return `<button class="chip" type="button" data-act="${act}" data-k="${esc(k)}" data-v="${v}" aria-pressed="${chosen === v}">${name}<b>${n}</b></button>`;
-  }).join("")}</div>`;
+/* --- Balances ------------------------------------------------------ */
+/* How "available now" is reached: the latest balance, less each expense not yet in it. */
+function workingOut(f) {
+  if (f.available == null) return "";
+  const base = f.last ? `Balance from accounts, ${dLong(f.last.asOn)}` : "Total budget (no balance from accounts yet)";
+  return `<details class="working"><summary>How “available now” is worked out</summary>
+    <div class="l"><span>${base}</span><span>${rs(f.last ? f.last.balance : f.h.total)}</span></div>
+    ${f.pending.map(e => `<div class="l minus"><span>− ${esc(e.item)}, ${dShort(e.date)} · ${esc(standing(e, TODAY)[1])}</span><span>${estimated(e) ? "≈ " : ""}${bare(rupees(e))}</span></div>`).join("")}
+    <div class="l total"><span>Available now</span><span>${approx(f.available, f.est)}</span></div>
+    <div class="note">Taken off: expenses not yet in that balance, meaning claims not yet reimbursed and institute bookings not yet charged${f.last ? ", and anything settled after it" : ""}.</div></details>`;
+}
+function balancesView() {
+  const finite = M.active.filter(x => x.h.kind === "finite");
+  return `${pageHead("Balances from accounts", "Each new balance is checked against the one before it, less what was charged in between.", `<button class="primary" type="button" data-new="balance">+ Balance</button>`)}
+    <div class="stack">${finite.map(f => {
+      const h = f.h, checkFor = new Map(f.checks.map(c => [c.statement, c]));
+      const rows = [...f.sts].reverse().map(s => {
+        const c = checkFor.get(s);
+        const check = !c ? `<span class="note">Starting balance</span>` : Math.round(c.gap) === 0 ? flagHtml(["good", `Matches the ${dShort(c.prev.asOn)} balance less what was charged since`])
+          : flagHtml(["warn", `${rs(Math.abs(c.gap))} ${c.gap < 0 ? "below" : "above"} the ${rs(c.expected)} expected${c.gap < 0 ? ": a charge not recorded here?" : ": a top-up, or a charge reversed?"}`]);
+        return `<tr data-editst="${esc(h.id)}|${s.asOn}"><td class="nowrap">${dLong(s.asOn)}</td><td class="r c-amt">${rs(s.balance)}</td><td class="c-wide">${esc(s.source || "")}</td><td class="c-wide">${check}</td></tr>`;
+      }).join("");
+      return `<section class="card" id="bal-${esc(h.id)}">
+        <div class="pagehead" style="margin-bottom:8px"><div><h1 style="font-size:18px">${esc(h.name)}${h.code ? ` <span class="note">${esc(h.code)}</span>` : ""}</h1>
+          <p class="meta">${[h.total != null ? `Total ${rs(h.total)}` : "", h.validTill ? `valid till ${dLong(h.validTill)}` : "", h.usedFor].filter(Boolean).map(esc).join(" · ")}</p></div>
+          <div style="text-align:right"><div class="meta">Available now</div>${f.available == null ? `<div class="note">not known until a balance is entered</div>` : `<div style="font-size:20px;font-weight:750">${approx(f.available, f.est)}</div>`}</div></div>
+        ${rows ? `<table class="t"><thead><tr><th>As on</th><th class="r">Balance</th><th>Source</th><th>Check</th></tr></thead><tbody>${rows}</tbody></table>`
+          : `<div class="empty">No balance from accounts yet.</div>`}
+        ${workingOut(f)}
+        <div style="margin-top:8px"><button class="link" type="button" data-new="balance" data-head="${esc(h.id)}">+ Balance for ${esc(h.name)}</button></div>
+      </section>`;
+    }).join("") || `<div class="note">No budget heads. Add one under Heads.</div>`}</div>`;
+}
+
+/* --- Salary -------------------------------------------------------- */
+function salaryView() {
+  const fyOf = p => fyStart(p.month + "-01");
+  const fys = [...new Set(M.slips.map(fyOf))].sort().reverse();
+  const fy = fys.includes(ui.salFy) ? ui.salFy : fys[0];
+  const xs = M.slips.filter(p => fyOf(p) === fy);
+  const add = `<button class="primary" type="button" data-new="payslip">+ Payslip</button>`;
+  if (!xs.length) return `${pageHead("Salary", "", add)}<div class="card"><span class="note">No payslips yet.</span></div>`;
+  const pdf = p => (p.file ? `<button class="link" type="button" data-openslip="${p.month}">Open</button>` : "");
+  return `${pageHead("Salary", "Click a month to see or change its payslip.", add)}
+    <div class="chips" style="margin-bottom:12px">${fys.map(f => `<button class="chip" type="button" data-salfy="${f}" aria-pressed="${f === fy}">FY ${fyLabel(f)}</button>`).join("")}</div>
+    <div class="card" style="padding:4px 8px"><table class="t"><thead><tr><th>Month</th><th class="r">Gross</th><th class="r">Income tax</th><th class="r">NPS / PF</th><th class="r">Other deductions</th><th class="r">Take-home</th><th>Bank credit</th><th>PDF</th></tr></thead>
+    <tbody>${[...xs].reverse().map(p => {
+      const g = creditGap(p);
+      return `<tr data-editslip="${p.month}"><td>${monthName(p.month)}<div class="sub ph">gross ${rs(gross(p))} · income tax ${rs(ofKind(p, "tax"))}${p.file ? ` · PDF ${pdf(p)}` : ""}</div></td>
+        <td class="r dt">${rs(gross(p))}</td><td class="r dt">${rs(ofKind(p, "tax"))}</td><td class="r dt">${rs(ofKind(p, "retirement"))}</td><td class="r dt">${rs(ofKind(p, "other"))}</td>
+        <td class="r c-amt"><b>${rs(net(p))}</b><span class="ph note"> take-home</span></td>
+        <td class="c-wide">${g == null ? `<span class="note">Bank credit not entered</span>` : g === 0 ? flagHtml(["good", `Credited ${dShort(p.credited.date)}, matches`]) : flagHtml(["warn", `Credited ${rs(p.credited.amount)}, ${rs(Math.abs(g))} ${g < 0 ? "less" : "more"}`])}</td>
+        <td class="dt">${pdf(p)}</td></tr>`;
+    }).join("")}</tbody>
+    <tfoot><tr><td>FY ${fyLabel(fy)}<div class="sub ph">gross ${rs(sum(xs, gross))} · income tax ${rs(sum(xs, x => ofKind(x, "tax")))}</div></td><td class="r dt">${rs(sum(xs, gross))}</td><td class="r dt">${rs(sum(xs, x => ofKind(x, "tax")))}</td><td class="r dt">${rs(sum(xs, x => ofKind(x, "retirement")))}</td><td class="r dt">${rs(sum(xs, x => ofKind(x, "other")))}</td><td class="r c-amt">${rs(sum(xs, net))}<span class="ph note"> take-home</span></td><td colspan="2" class="dt"></td></tr></tfoot></table></div>`;
+}
+
+/* --- Heads ------------------------------------------------------- */
+const usesOf = id => ({ expenses: S.doc.expenses.filter(e => e.head === id).length, balances: S.doc.statements.filter(x => x.head === id).length });
+function headsView() {
+  const row = h => {
+    const u = usesOf(h.id);
+    const facts = [h.code, h.kind === "finite" ? "has a budget" : "use-restricted", h.total != null && rs(h.total), h.validTill && `till ${dLong(h.validTill)}`, h.usedFor].filter(Boolean);
+    return `<tr data-edithead="${esc(h.id)}"><td><b>${esc(h.name)}</b><div class="sub ph">${facts.map(esc).join(" · ")}</div></td><td class="dt">${esc(h.code || "")}</td><td class="dt">${h.kind === "finite" ? "Has a budget" : "Use-restricted"}</td>
+      <td class="r dt">${h.total != null ? rs(h.total) : ""}</td><td class="nowrap dt">${h.validTill ? dLong(h.validTill) : ""}</td><td class="dt">${esc(h.usedFor || "")}</td>
+      <td class="r c-amt">${u.expenses + u.balances}<span class="ph note"> ${u.expenses + u.balances === 1 ? "entry" : "entries"}</span></td></tr>`;
+  };
+  const table = hs => `<div class="card" style="padding:4px 8px"><table class="t"><thead><tr><th>Name</th><th>Code</th><th>Kind</th><th class="r">Total</th><th>Valid till</th><th>Used for</th><th class="r">Entries</th></tr></thead>
+    <tbody>${hs.map(row).join("")}</tbody></table></div>`;
+  const open = S.doc.heads.filter(h => !h.closed), closed = S.doc.heads.filter(h => h.closed);
+  return `${pageHead("Heads", "The budgets and use-restricted heads expenses are charged to. Click one to change, close or delete it.", `<button class="primary" type="button" data-new="head">+ New head</button>`)}
+    ${open.length ? table(open) : `<div class="card note">No heads in use. Add one with + New head.</div>`}
+    ${closed.length ? `<h2 class="sec">Closed <span>hidden from the overview, the phone and the forms; their entries are kept</span></h2>${table(closed)}` : ""}`;
 }
 
 /* ------------------------------------------------------------------ *
- * Views.
+ * The drawer and its forms
  * ------------------------------------------------------------------ */
-function statusView() {
-  const owed = sum(M.mine, rupees), cl = sum(M.claimed, rupees), un = sum(M.unclaimed, rupees);
-  const finite = M.active.filter(x => x.h.kind === "finite");
-  const open = M.active.filter(x => x.h.kind === "open");
-  const p = M.latest;
-
-  const cards = finite.map(f => `
-    <a class="rowlink" href="#h-${esc(f.h.id)}"><div class="body">
-      <div class="line"><span class="name">${esc(f.h.name)}${f.h.code ? `<small>${esc(f.h.code)}</small>` : ""}</span><span class="amt">${f.available == null ? "—" : approx(f.available, f.est)}</span></div>
-      ${meter(f)}${meta(f)}${f.flags.map(flagHtml).join("")}
-    </div>${CHEV}</a>`).join("");
-  const none = text => `<div class="panel note">${text}</div>`;
-
-  const rows = open.map(o => `
-    <a class="rowlink" href="#h-${esc(o.h.id)}"><div class="body">
-      <div class="line"><span class="name">${esc(o.h.name)}</span><span class="amt"><span class="cnt">${plural(o.fy.length, "item")}</span>${approx(o.total, o.est)}</span></div>
-      ${o.flags.map(flagHtml).join("")}
-    </div>${CHEV}</a>`).join("");
-
-  let salary = `<div class="panel note">No payslips entered yet.</div>`;
-  if (p) {
-    const gap = creditGap(p);
-    salary = `<div class="list"><a class="rowlink" href="#salary"><div class="body">
-      <div class="line"><span class="name">${monthName(p.month)} take-home</span><span class="amt">${rs(net(p))}</span></div>
-      ${flagHtml(gap == null ? ["wait", "Not credited yet"] : gap === 0 ? ["good", `Credited ${dShort(p.credited.date)}, matches payslip`]
-        : ["warn", `Credited ${rs(p.credited.amount)} on ${dShort(p.credited.date)}; payslip says ${rs(net(p))}`])}
-      <div class="meta"><span>FY ${fyLabel(TODAY)} so far: gross ${rs(sum(M.fySlips, gross))} · income tax ${rs(sum(M.fySlips, x => ofKind(x, "tax")))}</span></div>
-      ${M.short.filter(x => x !== p).map(x => flagHtml(["warn", `${monthName(x.month)}: bank credit ${rs(Math.abs(creditGap(x)))} ${creditGap(x) < 0 ? "less" : "more"} than payslip`])).join("")}
-    </div>${CHEV}</a></div>`;
-  }
-
-  return `
-    <a class="hero" href="#owed">
-      <span class="eyebrow">Owed to you</span>
-      <span class="big">${approx(owed, M.mine.some(estimated))}</span>
-      <span class="sub">${rs(cl)} claimed and waiting · ${approx(un, M.unclaimed.some(estimated))} not claimed yet</span>
-      ${CHEV}
-    </a>
-    <h2 class="sec">Budgets <span>available now</span></h2>
-    ${cards ? `<div class="list">${cards}</div>` : none("No budget heads yet.")}
-    <h2 class="sec">Use-restricted <span>spent in FY ${fyLabel(TODAY)}</span></h2>
-    ${rows ? `<div class="list">${rows}</div>` : none("No use-restricted heads yet.")}
-    <h2 class="sec">Salary</h2>
-    ${salary}
-    <a class="textlink" href="#help">How to read this</a>`;
+let form = null; // { el, dirty, submit(kind) }
+function openDrawer(html, submit, after) {
+  const d = $("#drawer");
+  d.innerHTML = `<form novalidate>${html}</form>`;
+  d.hidden = false; $("#scrim").hidden = false;
+  form = { el: $("form", d), dirty: false, submit };
+  form.el.addEventListener("input", () => (form.dirty = true));
+  form.el.addEventListener("submit", ev => { ev.preventDefault(); form.submit(ev.submitter?.value || "save"); });
+  after?.(form.el);
+  const first = $("[autofocus]", form.el) || $("input:not([type=radio]):not([type=checkbox]), select", form.el);
+  first?.focus();
+}
+function closeDrawer(force = false) {
+  if (!form) return;
+  if (!force && form.dirty && !confirm("Close without saving what you typed?")) return;
+  $("#drawer").hidden = true; $("#scrim").hidden = true; $("#drawer").innerHTML = ""; form = null;
+}
+const drawerHead = title => `<h2><span>${title}</span><button class="x" type="button" data-act="close" aria-label="Close">×</button></h2>`;
+const fieldErr = (el, msg) => { el.classList.add("bad"); const f = el.closest(".field"); if (f && !$(".err", f)) f.insertAdjacentHTML("beforeend", `<div class="err">${esc(msg)}</div>`); };
+const clearErrs = el => { $$(".bad", el).forEach(x => x.classList.remove("bad")); $$(".err, .formerr", el).forEach(x => x.remove()); };
+const formError = (el, msg) => { $(".formerr", el)?.remove(); el.insertAdjacentHTML("afterbegin", `<div class="formerr">${esc(msg)}</div>`); };
+const datalist = (id, values) => `<datalist id="${id}">${[...new Set(values.filter(Boolean))].map(v => `<option value="${esc(v)}">`).join("")}</datalist>`;
+const deleteButton = () => `<button class="danger" type="button" data-act="delete">Delete</button>`;
+/* A delete takes two clicks: the first arms the button, the second deletes. */
+function armDelete(btn, run) {
+  if (btn.classList.contains("armed")) return run();
+  const label = btn.textContent;
+  btn.classList.add("armed"); btn.textContent = "Click again to delete";
+  setTimeout(() => { if (btn.isConnected) { btn.classList.remove("armed"); btn.textContent = label; } }, 4000);
 }
 
-function owedView() {
-  const claimed = M.claimed.map(e => txRow(e, { head: true })).join("");
-  const unclaimed = M.unclaimed.map(e => txRow(e, { head: true, extra: ` · paid ${days(daysBetween(e.date, TODAY))} ago` })).join("");
-  return `
-    <h1 class="title">Owed to you</h1>
-    <p class="lede">${approx(sum(M.mine, rupees), M.mine.some(estimated))} across ${plural(M.mine.length, "expense")} you paid yourself and have not been reimbursed for.</p>
-    <h2 class="sec">Claimed, waiting <span class="num">${rs(sum(M.claimed, rupees))}</span></h2>
-    <div class="ledger">${claimed || `<div class="empty">Nothing waiting.</div>`}</div>
-    <h2 class="sec">Not claimed yet <span class="num">${approx(sum(M.unclaimed, rupees), M.unclaimed.some(estimated))}</span></h2>
-    <div class="ledger">${unclaimed || `<div class="empty">Nothing to claim.</div>`}</div>`;
-}
-
-function finiteView(f) {
-  const h = f.h;
-  const SHOW = 6;
-  const listed = f.pending.length > SHOW ? f.pending.slice(0, SHOW - 1) : f.pending;
-  const rest = f.pending.slice(listed.length);
-  const calc = f.available == null
-    ? `<div class="panel note">No balance from accounts and no total budget entered yet, so what is available is not known. Add a balance on the laptop.</div>`
-    : `<div class="calc">
-    <div class="l"><span>${f.last ? `Balance from accounts, ${dLong(f.last.asOn)}` : "Total budget (no balance from accounts yet)"}</span><span>${rs(f.last ? f.last.balance : h.total)}</span></div>
-    ${listed.map(e => `<div class="l minus"><span>− ${esc(e.item)}</span><span>${estimated(e) ? "≈ " : ""}${bare(rupees(e))}</span></div>`).join("")}
-    ${rest.length ? `<div class="l minus"><span>− ${rest.length} more not yet in it</span><span>${bare(sum(rest, rupees))}</span></div>` : ""}
-    <div class="l total"><span>Available now</span><span>${approx(f.available, f.est)}</span></div>
-  </div>`;
-  const staleDays = f.last ? daysBetween(f.last.asOn, TODAY) : 0;
-  const stale = staleDays > 90 ? flagHtml(["wait", `Latest balance is ${days(staleDays)} old. A fresh one from accounts would confirm it.`]) : "";
-
-  const chosen = ui.stage[h.id] || "all";
-  const exps = chosen === "all" ? f.exps : f.exps.filter(e => stage(e) === chosen);
-  const checkFor = new Map(f.checks.map(c => [c.statement, c]));
-  const items = [
-    ...exps.map(e => ({ key: e.date, e })),
-    ...(chosen === "all" ? f.sts.map(s => ({ key: s.asOn, s })) : []),
-  ].sort((a, b) => (a.key > b.key ? -1 : a.key < b.key ? 1 : a.s ? -1 : 1));
-  const ledger = byMonth(items, it => {
-    if (it.e) return txRow(it.e);
-    const s = it.s, c = checkFor.get(s);
-    const line = !c ? `<div class="sub">Starting balance</div>`
-      : Math.round(c.gap) === 0
-        ? `<div class="flag dim">${ICON.good}<span>Matches the ${dShort(c.prev.asOn)} balance less what was charged since</span></div>`
-        : `<div class="flag dim">${ICON.warn}<span>${rs(Math.abs(c.gap))} ${c.gap < 0 ? "below" : "above"} the ${rs(c.expected)} expected from the ${dShort(c.prev.asOn)} balance${c.gap < 0 ? ". Look for a charge not recorded here." : ". A top-up, or a charge reversed?"}</span></div>`;
-    return `<div class="stmt">
-      <div class="line"><span class="item">Balance from accounts</span><span class="amt">${rs(s.balance)}</span></div>
-      <div class="sub">As on ${dLong(s.asOn)}${s.source ? ` · ${esc(s.source)}` : ""}</div>${line}</div>`;
-  });
-
-  return `${backLink()}
-    <h1 class="title">${esc(h.name)}${h.code ? `<small>${esc(h.code)}</small>` : ""}</h1>
-    ${h.usedFor ? `<p class="lede">${esc(h.usedFor)}</p>` : ""}
-    ${calc}
-    <p class="note">Taken off: expenses not yet in that balance, meaning claims not yet reimbursed and institute bookings not yet charged.</p>
-    <div class="panel">${meter(f)}${meta(f, true)}${f.flags.map(flagHtml).join("")}${stale}</div>
-    <h2 class="sec">History</h2>
-    ${stageChips(f.exps, chosen, "stage", h.id)}
-    <div class="ledger">${ledger || `<div class="empty">Nothing here.</div>`}</div>`;
-}
-
-function openView(o) {
-  const max = Math.max(1, ...o.purposes.map(([, p]) => p.total));
-  const bars = o.purposes.map(([name, p]) => `<div class="bar">
-      <div class="line"><span class="lab">${esc(name)}</span><span class="amt">${approx(p.total, p.est)}</span></div>
-      <div class="track"><i style="width:${((p.total / max) * 100).toFixed(1)}%"></i></div></div>`).join("");
-  const chosen = ui.stage[o.h.id] || "all";
-  const exps = (chosen === "all" ? o.exps : o.exps.filter(e => stage(e) === chosen)).slice().reverse();
-  return `${backLink()}
-    <h1 class="title">${esc(o.h.name)}</h1>
-    <p class="lede">${esc(o.h.usedFor || "")} · no spending limit</p>
-    <div class="tiles"><div class="tile wide"><span class="k">Spent in FY ${fyLabel(TODAY)}</span><span class="v">${approx(o.total, o.est)}</span><span class="k">${plural(o.fy.length, "item")}</span></div></div>
-    ${o.flags.map(flagHtml).join("")}
-    ${bars ? `<h2 class="sec">This FY, by purpose</h2><div class="panel">${bars}</div>` : ""}
-    <h2 class="sec">History</h2>
-    ${stageChips(o.exps, chosen, "stage", o.h.id)}
-    <div class="ledger">${byMonth(exps.map(e => ({ key: e.date, e })), it => txRow(it.e, { purpose: true })) || `<div class="empty">Nothing here.</div>`}</div>`;
-}
-
-/* History: every expense, searchable and filterable. */
-function histMatches() {
-  const { q, head, stage: st } = ui.hist;
-  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-  return M.d.expenses.filter(e => {
-    if (head !== "all" && e.head !== head) return false;
-    if (st !== "all" && stage(e) !== st) return false;
-    if (!words.length) return true;
-    const hay = [e.item, e.purpose, M.headName[e.head], e.foreign?.currency, String(rupees(e)), bare(rupees(e)), monthName(e.date.slice(0, 7))]
-      .filter(Boolean).join(" ").toLowerCase();
-    return words.every(w => hay.includes(w));
-  }).sort((a, b) => -byDate(a, b));
-}
-function histBody() {
-  const xs = histMatches();
-  const tally = `<div class="tally"><span>${plural(xs.length, "expense")}</span><b>${approx(sum(xs, rupees), xs.some(estimated))}</b></div>`;
-  const list = byMonth(xs.map(e => ({ key: e.date, e })), it => txRow(it.e, { head: true, purpose: true }));
-  return `${tally}<div class="ledger">${list || `<div class="empty">No expenses match.</div>`}</div>`;
-}
-function historyView() {
-  const heads = [["all", "All heads"], ...M.d.heads.map(h => [h.id, h.name])];
-  const base = M.d.expenses.filter(e => ui.hist.head === "all" || e.head === ui.hist.head);
-  return `
-    <h1 class="title">History</h1>
-    <input class="search" id="q" type="search" placeholder="Search: item, purpose, amount, month" value="${esc(ui.hist.q)}" aria-label="Search expenses">
-    <div class="chips" role="group" aria-label="Filter by head">${heads.map(([v, n]) =>
-      `<button class="chip" type="button" data-act="hhead" data-v="${esc(v)}" aria-pressed="${ui.hist.head === v}">${esc(n)}</button>`).join("")}</div>
-    ${stageChips(base, ui.hist.stage, "hstage")}
-    <div id="histBody" class="view">${histBody()}</div>`;
-}
-function wireSearch() {
-  const q = $("#q");
-  q.addEventListener("input", () => { ui.hist.q = q.value; $("#histBody").innerHTML = histBody(); });
-}
-
-function salaryView() {
-  if (!M.slips.length) return `<h1 class="title">Salary</h1><div class="panel note">No payslips entered yet.</div>`;
-  const fyOf = p => fyStart(p.month + "-01");
-  const fys = [...new Set(M.slips.map(fyOf))].sort().reverse();
-  const fy = ui.fy && fys.includes(ui.fy) ? ui.fy : fys.includes(fyStart(TODAY)) ? fyStart(TODAY) : fys[0];
-  const S = M.slips.filter(p => fyOf(p) === fy);
-  const sel = S.find(p => p.month === ui.slip) || S.at(-1);
-  const span = `${MONTH[parts(S[0].month)[1] - 1]} to ${MONTH[parts(S.at(-1).month)[1] - 1]}`;
-  const tile = (k, v) => `<div class="tile"><span class="k">${k}</span><span class="v">${rs(v)}</span></div>`;
-  const bank = p => {
-    const g = creditGap(p);
-    return g == null ? ICON.wait : g === 0 ? ICON.good : `${ICON.warn}<span class="gap">${g < 0 ? "−" : "+"}${bare(Math.abs(g))}</span>`;
+/* --- Expense form -------------------------------------------------- */
+function expenseForm(existing = null, preset = {}) {
+  // Closed heads are not offered, except the one an expense being changed is already on.
+  const heads = S.doc.heads.filter(h => !h.closed || h.id === existing?.head);
+  if (!heads.length) return toast("Add a head first, under Heads.", "crit");
+  const e = existing ? clone(existing) : {
+    head: preset.head || ui.last.head || heads[0].id, date: preset.date || TODAY, item: "",
+    paidBy: preset.paidBy || ui.last.paidBy || "me", purpose: preset.purpose ?? "", inr: null,
   };
-  const rows = S.map(p => `<tr data-act="slip" data-v="${p.month}" aria-selected="${p === sel}">
-    <td>${MON[parts(p.month)[1] - 1]}</td><td>${bare(gross(p))}</td><td>${bare(ofKind(p, "tax"))}</td><td>${bare(net(p))}</td><td class="bank">${bank(p)}</td></tr>`).join("");
-  const list = xs => xs.map(x => `<div class="l"><span>${esc(x.label)}</span><span>${bare(x.amount)}</span></div>`).join("");
-  const short = S.filter(p => p.credited && creditGap(p) !== 0);
+  if (!heads.some(h => h.id === e.head)) e.head = heads[0].id;
+  const fx = !!e.foreign;
+  const items = S.doc.expenses.map(x => x.item);
+  const currencies = ["USD", "EUR", "GBP", ...S.doc.expenses.map(x => x.foreign?.currency)];
+  const html = `${drawerHead(existing ? "Change expense" : "New expense")}
+    <div class="field"><span class="lab">Head</span><div class="pills">${heads.map(h => `<label><input type="radio" name="head" value="${esc(h.id)}" ${h.id === e.head ? "checked" : ""}>${esc(h.name)}</label>`).join("")}</div>
+      <div class="hint" id="headNote"></div></div>
+    <div class="field"><label for="fDate">Date</label><div class="inline"><input type="date" id="fDate" name="date" value="${e.date}">
+      <button class="mini" type="button" data-setdate="${TODAY}">Today</button><button class="mini" type="button" data-setdate="${YESTERDAY}">Yesterday</button></div></div>
+    <div class="field"><label for="fItem">What was it</label><input id="fItem" name="itemName" value="${esc(e.item)}" list="dlItems" placeholder="e.g. Hotel, Pune, 2 nights" autocomplete="off" ${existing ? "" : "autofocus"}>${datalist("dlItems", items)}</div>
+    <div class="field" id="purposeField"><label for="fPurpose" id="purposeLabel">Purpose</label><input id="fPurpose" name="purpose" value="${esc(e.purpose || "")}" list="dlPurpose" autocomplete="off"><datalist id="dlPurpose"></datalist><div class="hint" id="purposeHint"></div></div>
+    <div class="field"><span class="lab">Amount</span>
+      <div class="seg"><label><input type="radio" name="cur" value="inr" ${fx ? "" : "checked"}>Rupees</label><label><input type="radio" name="cur" value="fx" ${fx ? "checked" : ""}>Another currency</label></div>
+      <div id="inrBox" ${fx ? "hidden" : ""}><input class="amt" name="inr" inputmode="decimal" value="${fx ? "" : amtText(e.inr)}" placeholder="₹" aria-label="Amount in rupees"></div>
+      <div id="fxBox" class="box" ${fx ? "" : "hidden"}>
+        <div class="row3"><div class="field"><label>Currency</label><input name="currency" value="${esc(e.foreign?.currency || "")}" list="dlCur" maxlength="3" placeholder="USD" style="text-transform:uppercase" autocomplete="off">${datalist("dlCur", currencies)}</div>
+          <div class="field"><label>Amount</label><input class="amt" name="famount" inputmode="decimal" value="${e.foreign ? amtText(e.foreign.amount) : ""}"></div>
+          <div class="field"><label>Rate, ₹ per unit</label><input class="amt" name="rate" inputmode="decimal" value="${e.foreign ? e.foreign.rate : ""}"></div></div>
+        <div class="field"><label>Rupee amount, once fixed for reimbursement</label><input class="amt" name="inrFixed" inputmode="decimal" value="${fx ? amtText(e.inr) : ""}" placeholder="leave empty until known"><div class="hint" id="fxEst"></div></div>
+      </div></div>
+    <div class="field"><span class="lab">Who paid</span><div class="seg"><label><input type="radio" name="paidBy" value="me" ${e.paidBy === "me" ? "checked" : ""}>I paid</label><label><input type="radio" name="paidBy" value="institute" ${e.paidBy === "institute" ? "checked" : ""}>The institute paid</label></div></div>
+    <div class="field"><span class="lab">Where it stands</span>
+      <div class="progress" id="mineBox">
+        <label class="check"><input type="checkbox" name="hasClaimed" ${e.claimed ? "checked" : ""}>Claimed</label><input type="date" name="claimed" value="${e.claimed || ""}" max="${TODAY}" ${e.claimed ? "" : "disabled"}>
+        <label class="check"><input type="checkbox" name="hasReimbursed" ${e.reimbursed ? "checked" : ""}>Reimbursed</label><input type="date" name="reimbursed" value="${e.reimbursed || ""}" max="${TODAY}" ${e.reimbursed ? "" : "disabled"}>
+      </div>
+      <div class="progress" id="instBox">
+        <label class="check"><input type="checkbox" name="hasCharged" ${e.charged ? "checked" : ""}>Charged to the head</label><input type="date" name="charged" value="${e.charged || ""}" max="${TODAY}" ${e.charged ? "" : "disabled"}>
+      </div></div>
+    <div class="impact" id="impact"></div>
+    <div class="btnrow">
+      <button class="primary" type="submit" value="save">Save <kbd>⌘↵</kbd></button>
+      ${existing ? `<button class="ghost" type="submit" value="copy">Save as a new copy</button><span class="grow"></span>${deleteButton()}`
+        : `<button class="ghost" type="submit" value="again">Save &amp; add another</button><span class="grow"></span>`}
+    </div>`;
 
-  return `
-    <h1 class="title">Salary</h1>
-    ${fys.length > 1 ? `<div class="chips" role="group" aria-label="Financial year">${fys.map(y =>
-      `<button class="chip" type="button" data-act="fy" data-v="${y}" aria-pressed="${y === fy}">FY ${fyLabel(y)}</button>`).join("")}</div>` : ""}
-    <p class="lede">FY ${fyLabel(fy)}${fy === fyStart(TODAY) ? " so far" : ""} · ${span}</p>
-    <div class="tiles">
-      ${tile("Gross pay", sum(S, gross))}
-      ${tile("Income tax deducted", sum(S, x => ofKind(x, "tax")))}
-      ${tile("NPS / PF, your share", sum(S, x => ofKind(x, "retirement")))}
-      ${tile("Take-home", sum(S, net))}
-    </div>
-    ${short.map(x => flagHtml(["warn", `${monthName(x.month)}: bank credit ${rs(Math.abs(creditGap(x)))} ${creditGap(x) < 0 ? "less" : "more"} than the payslip's take-home`])).join("")}
-    <div class="tablebox"><table class="sal">
-      <thead><tr><th>Month</th><th>Gross</th><th>Tax</th><th>Take-home</th><th>Bank</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr><td>Total</td><td>${bare(sum(S, gross))}</td><td>${bare(sum(S, x => ofKind(x, "tax")))}</td><td>${bare(sum(S, net))}</td><td></td></tr></tfoot>
-    </table></div>
-    <p class="note">Tap a month for its payslip.</p>
-    <h2 class="sec">${monthName(sel.month)} payslip</h2>
-    <div class="calc">
-      <div class="l sh"><span>Earnings</span></div>${list(sel.earnings)}
-      <div class="l total"><span>Gross</span><span>${rs(gross(sel))}</span></div>
-      <div class="l sh"><span>Deductions</span></div>${list(sel.deductions)}
-      <div class="l total"><span>Take-home</span><span>${rs(net(sel))}</span></div>
-    </div>
-    ${sel.credited ? flagHtml(creditGap(sel) === 0 ? ["good", `Credited ${dLong(sel.credited.date)}, matches`] : ["warn", `Credited ${rs(sel.credited.amount)} on ${dLong(sel.credited.date)}`]) : ""}`;
+  openDrawer(html, kind => saveExpense(kind, existing), el => {
+    const sync = () => {
+      const head = heads.find(h => h.id === el.elements.head.value);
+      const open = head?.kind === "open";
+      $("#headNote", el).textContent = head?.usedFor || "";
+      $("#purposeLabel", el).textContent = open ? "Purpose (required)" : "Purpose (optional)";
+      $("#purposeHint", el).textContent = open ? `Which ${head.name.toLowerCase().replace(/s$/, "")} this was for. It groups the spending on the phone.` : "";
+      $("#dlPurpose", el).innerHTML = [...new Set(S.doc.expenses.filter(x => x.head === head?.id && x.purpose).map(x => x.purpose))].map(v => `<option value="${esc(v)}">`).join("");
+      const fxOn = el.elements.cur.value === "fx";
+      $("#inrBox", el).hidden = fxOn; $("#fxBox", el).hidden = !fxOn;
+      const mine = el.elements.paidBy.value === "me";
+      $("#mineBox", el).hidden = !mine; $("#instBox", el).hidden = mine;
+      for (const k of ["claimed", "reimbursed", "charged"]) {
+        const box = el.elements["has" + k[0].toUpperCase() + k.slice(1)], d = el.elements[k];
+        d.disabled = !box.checked;
+        if (box.checked && !d.value) d.value = TODAY;
+      }
+      const fa = parseAmount(el.elements.famount.value), rt = parseAmount(el.elements.rate.value);
+      $("#fxEst", el).textContent = fa != null && rt ? `Until then it counts as ≈ ${rs(fa * rt)} (${IN2.format(fa)} × ₹${rt}).` : "";
+      const r = readExpense(el, existing, true);
+      $("#impact", el).innerHTML = r.e ? impactHtml(r.e, existing) : `<span class="note">Fill in the head and amount to see the effect.</span>`;
+    };
+    el.addEventListener("input", sync);
+    el.addEventListener("change", ev => {
+      if (ev.target.name === "head" && !existing) {
+        const p = ui.last.purpose[ev.target.value];
+        if (p && !el.elements.purpose.value) el.elements.purpose.value = p;
+      }
+      if (ev.target.name === "currency" && !existing) {
+        const c = ev.target.value.trim().toUpperCase();
+        const prev = [...S.doc.expenses].reverse().find(x => x.foreign?.currency === c);
+        if (prev && !el.elements.rate.value) el.elements.rate.value = prev.foreign.rate; // the rate he used last time, to change if it moved
+      }
+      sync();
+    });
+    el.addEventListener("click", ev => { const b = ev.target.closest("[data-setdate]"); if (b) { el.elements.date.value = b.dataset.setdate; sync(); } });
+    sync();
+  });
 }
 
-function helpView() {
-  return `${backLink()}
-    <h1 class="title">How to read this</h1>
-    <div class="panel prose">
-      <p><b>Available now</b> on a budget is the latest balance you entered from accounts, less every expense not yet in it: claims not yet reimbursed and institute bookings not yet charged. Each head's page shows the subtraction line by line.</p>
-      <p><b>Balance check.</b> When a new balance from accounts arrives, it is compared with the previous one less what was charged in between. A gap means something was charged that is not recorded here, or the reverse.</p>
-      <p><b>Use-restricted heads</b> have no limit. They show what was spent in the financial year (April to March), grouped by purpose.</p>
-      <p><b>≈</b> marks an amount that includes a foreign-currency expense whose rupee figure is not fixed yet. It is estimated at the rate entered until the rupee amount is known.</p>
-    </div>
-    <div class="panel legend">
-      <div class="flag">${ICON.good}<span>Settled: reimbursed, charged, or the bank credit matches the payslip</span></div>
-      <div class="flag dim">${ICON.wait}<span>On its way: claimed, booked, or waiting</span></div>
-      <div class="flag dim">${ICON.todo}<span>Not claimed yet: you need to act</span></div>
-      <div class="flag">${ICON.warn}<span>Worth a look: running low, ending soon, or a gap</span></div>
-      <div class="flag">${ICON.crit}<span>Problem: overspent or ended</span></div>
-    </div>
-    <div class="panel prose">${DBX
-      ? `<p><b>Where the figures come from.</b> Each time you open the app it reads <b>${esc(DBX.file.replace(/^\//, ""))}</b> from the app's own folder in your Dropbox (under Apps), the file the laptop saves. The last copy stays on this phone, so the app also opens offline. ↻ beside “Updated” checks again.</p>
-         <p><b>Sign out</b>, at the top, ends the Dropbox sign-in and deletes the copy from this phone.</p>`
-      : `<p><b>Lock</b>, at the top, forgets the key on this phone. The passphrase is then needed again.</p>`}</div>`;
+function readExpense(el, existing, quiet = false) {
+  const v = n => (el.elements[n]?.value ?? "").trim();
+  const errs = [];
+  const head = S.doc.heads.find(h => h.id === el.elements.head.value);
+  // The field is "itemName", not "item": form.elements.item is a built-in method, so a field called "item" cannot be read by name.
+  const e = { id: existing?.id || newId(), head: head?.id, date: v("date"), item: v("itemName"), paidBy: el.elements.paidBy.value };
+  if (v("purpose")) e.purpose = v("purpose");
+  if (!head) errs.push(["head", "Choose a head."]);
+  if (!RE_DATE.test(e.date)) errs.push(["date", "Enter the date."]);
+  if (!e.item) errs.push(["itemName", "Say what it was."]);
+  if (head?.kind === "open" && !e.purpose) errs.push(["purpose", `${head.name} can only be used for its purpose, so say which.`]);
+  if (el.elements.cur.value === "inr") {
+    e.inr = parseAmount(v("inr"));
+    if (e.inr == null) errs.push(["inr", "Enter the amount in rupees, e.g. 14,250."]);
+  } else {
+    const currency = v("currency").toUpperCase(), amount = parseAmount(v("famount")), rate = parseAmount(v("rate"));
+    if (!/^[A-Z]{3}$/.test(currency)) errs.push(["currency", "A three-letter code, e.g. USD."]);
+    if (amount == null) errs.push(["famount", "Enter the amount."]);
+    if (!rate || rate <= 0) errs.push(["rate", "Enter the rate in rupees."]);
+    e.foreign = { currency, amount, rate };
+    e.inr = v("inrFixed") ? parseAmount(v("inrFixed")) : null;
+    if (v("inrFixed") && e.inr == null) errs.push(["inrFixed", "Enter a rupee amount, or leave it empty."]);
+  }
+  const stamp = k => { if (el.elements["has" + k[0].toUpperCase() + k.slice(1)].checked) { e[k] = v(k); if (!RE_DATE.test(e[k])) errs.push([k, "Enter the date."]); } };
+  if (e.paidBy === "me") { stamp("claimed"); stamp("reimbursed"); } else stamp("charged");
+  if (e.claimed && e.claimed < e.date) errs.push(["claimed", "The claim is dated before the expense."]);
+  if (e.reimbursed && e.claimed && e.reimbursed < e.claimed) errs.push(["reimbursed", "Reimbursed before it was claimed?"]);
+  if (e.reimbursed && e.foreign && e.inr == null) errs.push(["inrFixed", "Enter the rupee amount paid back: it is fixed once reimbursed."]);
+  if (quiet) return { e: errs.some(([k]) => ["head", "inr", "famount", "rate", "currency"].includes(k)) ? null : e };
+  return { e, errs };
 }
 
-if (DBX) startDropbox(); else startSealed();
+function impactHtml(e, existing) {
+  const next = clone(S.doc);
+  if (existing) next.expenses = next.expenses.filter(x => x.id !== existing.id);
+  next.expenses.push(e);
+  if (problems(next).length) return `<span class="note">Fill in the rest to see the effect.</span>`;
+  const after = buildModel(next, TODAY), lines = [];
+  for (const id of new Set([existing?.head, e.head].filter(Boolean))) {
+    const b = M.heads.find(x => x.h.id === id), a = after.heads.find(x => x.h.id === id);
+    if (!b || !a) continue;
+    lines.push(b.h.kind === "finite"
+      ? `<div>${esc(b.h.name)}: available now <b>${fmtAvail(b)}</b> → <b>${fmtAvail(a)}</b></div>`
+      : `<div>${esc(b.h.name)}, spent in FY ${fyLabel(TODAY)}: <b>${approx(b.total, b.est)}</b> → <b>${approx(a.total, a.est)}</b></div>`);
+  }
+  const owedB = sum(M.mine, rupees), owedA = sum(after.mine, rupees);
+  if (owedA !== owedB) lines.push(`<div>Owed to you: <b>${rs(owedB)}</b> → <b>${rs(owedA)}</b></div>`);
+  return lines.join("") || `<span class="note">No change to any balance.</span>`;
+}
+
+async function saveExpense(kind, existing) {
+  const el = form.el;
+  clearErrs(el);
+  const { e, errs } = readExpense(el, kind === "copy" ? null : existing);
+  if (errs.length) { for (const [n, msg] of errs) { const f = el.elements[n]; if (f?.classList) fieldErr(f, msg); else formError(el, msg); } return; }
+  const next = clone(S.doc);
+  if (existing && kind !== "copy") next.expenses = next.expenses.map(x => (x.id === existing.id ? e : x));
+  else next.expenses.push(e);
+  ui.last = { ...ui.last, head: e.head, paidBy: e.paidBy, purpose: { ...ui.last.purpose, ...(e.purpose ? { [e.head]: e.purpose } : {}) } };
+  const ok = await commit(next, existing && kind !== "copy" ? `Changed “${e.item}”.` : `Added “${e.item}”, ${approx(rupees(e), estimated(e))} on ${headName(e.head)}.`);
+  if (!ok) return;
+  closeDrawer(true);
+  if (kind === "again") expenseForm(null, { head: e.head, date: e.date, paidBy: e.paidBy, purpose: e.purpose || "" });
+}
+async function deleteExpense(id) {
+  const e = S.doc.expenses.find(x => x.id === id);
+  const next = clone(S.doc);
+  next.expenses = next.expenses.filter(x => x.id !== id);
+  if (await commit(next, `Deleted “${e.item}”.`)) closeDrawer(true);
+}
+
+/* --- Marking claimed, reimbursed or charged, one or many ------------ */
+async function markDone(key, ids, date) {
+  const L = LISTS[key];
+  if (!RE_DATE.test(date || "")) return toast("Choose the date first.", "crit");
+  const next = clone(S.doc);
+  for (const id of ids) {
+    const e = next.expenses.find(x => x.id === id);
+    if (key === "reimb" && e.inr == null) {
+      const v = parseAmount(ui.fixed[id]);
+      if (v == null) { toast(`Enter the rupee amount paid back for “${e.item}” first.`, "crit"); $(`[data-fix="${CSS.escape(id)}"]`)?.focus(); return; }
+      e.inr = v;
+    }
+    if (key === "claim" && date < e.date) return toast(`“${e.item}” is dated ${dShort(e.date)}, after that claim date.`, "crit");
+    if (key === "reimb" && e.claimed && date < e.claimed) return toast(`“${e.item}” was claimed on ${dShort(e.claimed)}, after that date.`, "crit");
+    e[L.field] = date;
+  }
+  const one = ids.length === 1 ? `“${next.expenses.find(x => x.id === ids[0]).item}”` : plural(ids.length, "expense");
+  if (await commit(next, `${one} marked ${L.done} on ${dShort(date)}.`)) { ui.sel[key].clear(); for (const id of ids) delete ui.fixed[id]; render(); }
+}
+
+/* --- Balance form -------------------------------------------------- */
+function balanceForm(existing = null, preset = {}) {
+  const finite = S.doc.heads.filter(h => h.kind === "finite" && (!h.closed || h.id === existing?.head));
+  if (!finite.length) return toast("There is no head with a budget. Add one under Heads.", "crit");
+  const s = existing ? clone(existing) : { head: preset.head || finite.find(h => !S.doc.statements.some(x => x.head === h.id))?.id || finite[0].id, asOn: TODAY, balance: null, source: "" };
+  const html = `${drawerHead(existing ? "Change balance from accounts" : "Balance from accounts")}
+    <p class="note" style="margin:0">The balance on a head as the accounts office (or a sanction letter, or a ledger) gives it, on a given date. “Available now” starts from the latest one.</p>
+    <div class="field"><span class="lab">Head</span><div class="pills">${finite.map(h => `<label><input type="radio" name="head" value="${esc(h.id)}" ${h.id === s.head ? "checked" : ""}>${esc(h.name)}</label>`).join("")}</div></div>
+    <div class="row2"><div class="field"><label for="fAsOn">As on</label><input type="date" id="fAsOn" name="asOn" value="${s.asOn}" max="${TODAY}"></div>
+      <div class="field"><label for="fBal">Balance</label><input class="amt" id="fBal" name="balance" inputmode="decimal" value="${amtText(s.balance)}" placeholder="₹" autofocus></div></div>
+    <div class="field"><label for="fSrc">Where it comes from</label><input id="fSrc" name="source" value="${esc(s.source || "")}" list="dlSrc" autocomplete="off" placeholder="e.g. Accounts office statement">${datalist("dlSrc", [...S.doc.statements.map(x => x.source), ...SOURCES])}</div>
+    <div class="impact" id="impact"></div>
+    <div class="btnrow"><button class="primary" type="submit" value="save">Save <kbd>⌘↵</kbd></button><span class="grow"></span>${existing ? deleteButton() : ""}</div>`;
+  openDrawer(html, () => saveBalance(existing), el => {
+    const sync = () => {
+      const r = readBalance(el, existing);
+      if (!r.s) { $("#impact", el).innerHTML = `<span class="note">Enter the date and balance to see how it compares with the last one.</span>`; return; }
+      const next = clone(S.doc);
+      next.statements = next.statements.filter(x => !(existing && x.head === existing.head && x.asOn === existing.asOn));
+      if (next.statements.some(x => x.head === r.s.head && x.asOn === r.s.asOn)) { $("#impact", el).innerHTML = `<span class="note">There is already a balance for this head on that date. Change that one instead.</span>`; return; }
+      next.statements.push(r.s);
+      const a = buildModel(next, TODAY).heads.find(x => x.h.id === r.s.head), b = M.heads.find(x => x.h.id === r.s.head);
+      const c = a.checks.find(x => x.statement.asOn === r.s.asOn);
+      const check = !c ? `<div>This will be the first balance for ${esc(a.h.name)}: everything else is measured from it.</div>`
+        : `<div>Previous balance ${rs(c.prev.balance)} on ${dShort(c.prev.asOn)}, less ${rs(c.prev.balance - c.expected)} charged since: <b>${rs(c.expected)}</b> expected.</div>
+           ${Math.round(c.gap) === 0 ? flagHtml(["good", "Matches exactly."]) : flagHtml(["warn", `${rs(Math.abs(c.gap))} ${c.gap < 0 ? "below" : "above"} what was expected${c.gap < 0 ? ": accounts may have charged something not recorded here." : ": a top-up, or a charge reversed?"}`])}`;
+      $("#impact", el).innerHTML = `${check}<div>Available now: <b>${fmtAvail(b)}</b> → <b>${fmtAvail(a)}</b></div>`;
+    };
+    el.addEventListener("input", sync); el.addEventListener("change", sync); sync();
+  });
+}
+function readBalance(el) {
+  const v = n => (el.elements[n]?.value ?? "").trim();
+  const s = { head: el.elements.head.value, asOn: v("asOn"), balance: parseAmount(v("balance")) };
+  if (v("source")) s.source = v("source");
+  const errs = [];
+  if (!RE_DATE.test(s.asOn)) errs.push(["asOn", "Enter the date of the balance."]);
+  if (s.balance == null) errs.push(["balance", "Enter the balance, e.g. 5,12,400."]);
+  return { s: errs.length ? null : s, errs, raw: s };
+}
+async function saveBalance(existing) {
+  const el = form.el;
+  clearErrs(el);
+  const { s, errs } = readBalance(el);
+  if (errs.length) { for (const [n, m] of errs) fieldErr(el.elements[n], m); return; }
+  const next = clone(S.doc);
+  next.statements = next.statements.filter(x => !(existing && x.head === existing.head && x.asOn === existing.asOn));
+  if (next.statements.some(x => x.head === s.head && x.asOn === s.asOn)) return fieldErr(el.elements.asOn, "There is already a balance for this head on this date.");
+  next.statements.push(s);
+  if (await commit(next, `${existing ? "Changed" : "Added"} the ${headName(s.head)} balance, ${rs(s.balance)} as on ${dShort(s.asOn)}.`)) closeDrawer(true);
+}
+async function deleteBalance(existing) {
+  const next = clone(S.doc);
+  next.statements = next.statements.filter(x => !(x.head === existing.head && x.asOn === existing.asOn));
+  if (await commit(next, `Deleted the ${headName(existing.head)} balance of ${dShort(existing.asOn)}.`)) closeDrawer(true);
+}
+
+/* --- Payslip form -------------------------------------------------- */
+const KINDS = [["tax", "Income tax"], ["retirement", "NPS / PF"], ["other", "Other"]];
+function nextMonth(ym) { let [y, m] = parts(ym); m++; if (m > 12) { m = 1; y++; } return `${y}-${pad(m)}`; }
+function payslipForm(existing = null) {
+  const last = M.latest;
+  const copied = !existing && last;
+  const p = existing ? clone(existing) : copied
+    ? { month: nextMonth(last.month), earnings: clone(last.earnings), deductions: clone(last.deductions) }
+    : { month: TODAY.slice(0, 7), earnings: [{ label: "", amount: null }], deductions: [{ label: "", amount: null, kind: "tax" }] };
+  const eRow = x => `<div class="line3"><input name="eLabel" value="${esc(x.label)}" placeholder="e.g. Basic pay" aria-label="Earning"><input class="amt" name="eAmt" inputmode="decimal" value="${amtText(x.amount)}" placeholder="₹" aria-label="Amount"><button class="rm" type="button" data-rm aria-label="Remove line">×</button></div>`;
+  const dRow = x => `<div class="line4"><input name="dLabel" value="${esc(x.label)}" placeholder="e.g. Income tax (TDS)" aria-label="Deduction"><input class="amt" name="dAmt" inputmode="decimal" value="${amtText(x.amount)}" placeholder="₹" aria-label="Amount">
+    <select name="dKind" aria-label="Kind">${KINDS.map(([k, t]) => `<option value="${k}" ${x.kind === k ? "selected" : ""}>${t}</option>`).join("")}</select><button class="rm" type="button" data-rm aria-label="Remove line">×</button></div>`;
+  const html = `${drawerHead(existing ? `Payslip, ${monthName(existing.month)}` : "New payslip")}
+    ${copied ? `<div class="impact"><div>The lines are copied from <b>${monthName(last.month)}</b>, as a start. Change whatever differs this month.</div><div><button class="link" type="button" data-act="blankslip">Start blank instead</button></div></div>` : ""}
+    <div class="field"><label for="fMonth">Month</label><input type="month" id="fMonth" name="month" value="${p.month}" ${existing ? "" : "autofocus"}></div>
+    <div class="field"><span class="lab">Earnings</span><div class="lines" id="eLines">${p.earnings.map(eRow).join("")}</div><button class="link" type="button" data-addline="e">+ Earning</button></div>
+    <div class="field"><span class="lab">Deductions</span><div class="lines" id="dLines">${p.deductions.map(dRow).join("")}</div><button class="link" type="button" data-addline="d">+ Deduction</button>
+      <div class="hint">The kind is how the phone finds income tax and NPS / PF for the year.</div></div>
+    <div class="totals"><div><span>Gross</span><b id="tGross"></b></div><div><span>Deductions</span><b id="tDed"></b></div><div><span>Take-home</span><b id="tNet"></b></div></div>
+    <div class="field"><span class="lab">Credited to the bank</span><div class="row2"><input type="date" name="cDate" value="${p.credited?.date || ""}" aria-label="Date credited"><input class="amt" name="cAmt" inputmode="decimal" value="${amtText(p.credited?.amount)}" placeholder="₹ as the bank shows it" aria-label="Amount credited"></div><div class="hint" id="cCheck"></div></div>
+    <div class="field"><span class="lab">Payslip PDF</span>${p.file ? `<div class="note">Attached. <button class="link" type="button" data-openslip="${p.month}">Open it</button>. Choose another file to replace it.</div>` : ""}
+      <input type="file" name="pdf" accept="application/pdf"><div class="hint">Kept beside budget.json, as payslips/${p.month}.pdf.</div></div>
+    <div class="btnrow"><button class="primary" type="submit" value="save">Save <kbd>⌘↵</kbd></button><span class="grow"></span>${existing ? deleteButton() : ""}</div>`;
+  openDrawer(html, () => savePayslip(existing), el => {
+    const sync = () => {
+      const r = readPayslip(el);
+      const g = sum(r.p.earnings, x => x.amount || 0), d = sum(r.p.deductions, x => x.amount || 0);
+      $("#tGross", el).textContent = rs(g); $("#tDed", el).textContent = rs(d); $("#tNet", el).textContent = rs(g - d);
+      const c = parseAmount(el.elements.cAmt.value);
+      $("#cCheck", el).innerHTML = c == null ? "" : Math.round(c - (g - d)) === 0 ? flagHtml(["good", "Matches the take-home."]) : flagHtml(["warn", `${rs(Math.abs(c - (g - d)))} ${c < g - d ? "less" : "more"} than the take-home.`]);
+    };
+    el.addEventListener("input", sync);
+    el.addEventListener("click", ev => {
+      const rm = ev.target.closest("[data-rm]"); if (rm) { rm.parentElement.remove(); form.dirty = true; sync(); }
+      const add = ev.target.closest("[data-addline]");
+      if (add) { const box = $(add.dataset.addline === "e" ? "#eLines" : "#dLines", el); box.insertAdjacentHTML("beforeend", add.dataset.addline === "e" ? eRow({ label: "", amount: null }) : dRow({ label: "", amount: null, kind: "other" })); $("input", box.lastElementChild).focus(); sync(); }
+      if (ev.target.closest("[data-act=blankslip]")) { closeDrawer(true); payslipBlank(); }
+    });
+    sync();
+  });
+}
+function payslipBlank() {
+  const last = M.latest;
+  M.latest = null;
+  try { payslipForm(); } finally { M.latest = last; }
+  if (last) form.el.elements.month.value = nextMonth(last.month);
+}
+function readPayslip(el) {
+  const vals = name => $$(`[name="${name}"]`, el).map(x => x.value.trim());
+  const eL = vals("eLabel"), eA = vals("eAmt"), dL = vals("dLabel"), dA = vals("dAmt"), dK = vals("dKind");
+  const errs = [];
+  // A line left completely empty is ignored; a half-filled one is an error.
+  const p = {
+    month: el.elements.month.value,
+    earnings: eL.map((label, i) => ({ label, amount: parseAmount(eA[i]), raw: eA[i] })).filter(x => x.label || x.raw),
+    deductions: dL.map((label, i) => ({ label, amount: parseAmount(dA[i]), kind: dK[i], raw: dA[i] })).filter(x => x.label || x.raw),
+  };
+  if (!RE_MONTH.test(p.month)) errs.push("Choose the month.");
+  if (!p.earnings.length) errs.push("Add at least one earning.");
+  for (const x of [...p.earnings, ...p.deductions]) { if (!x.label) errs.push("Every line needs a name."); if (x.amount == null) errs.push(`Enter an amount for “${x.label || "a line"}”.`); }
+  for (const x of [...p.earnings, ...p.deductions]) delete x.raw;
+  const cDate = el.elements.cDate.value, cAmt = el.elements.cAmt.value.trim();
+  if (cDate || cAmt) {
+    if (!RE_DATE.test(cDate) || parseAmount(cAmt) == null) errs.push("For the bank credit, give both the date and the amount (or neither).");
+    else p.credited = { date: cDate, amount: parseAmount(cAmt) };
+  }
+  return { p, errs: [...new Set(errs)] };
+}
+async function savePayslip(existing) {
+  const el = form.el;
+  clearErrs(el);
+  const { p, errs } = readPayslip(el);
+  if (errs.length) return formError(el, errs.join(" "));
+  if (S.doc.payslips.some(x => x.month === p.month && x.month !== existing?.month)) return formError(el, `There is already a payslip for ${monthName(p.month)}. Open that one to change it.`);
+  if (existing?.file && existing.month === p.month) p.file = existing.file;
+  const pdf = el.elements.pdf.files[0];
+  if (pdf) {
+    if (S.sample || browsingSample) return toast("This is the SAMPLE, so nothing is saved.", "crit");
+    let r;
+    try { r = await store.putPayslip(p.month, pdf); } catch { return; } // the laptop's server has stopped; the store has said so
+    if (r.error) return formError(el, r.error);
+    p.file = r.file;
+  }
+  const next = clone(S.doc);
+  next.payslips = next.payslips.filter(x => x.month !== existing?.month).concat(p);
+  if (await commit(next, `${existing ? "Changed" : "Added"} the ${monthName(p.month)} payslip: take-home ${rs(net(p))}.`)) closeDrawer(true);
+}
+async function deletePayslip(existing) {
+  const next = clone(S.doc);
+  next.payslips = next.payslips.filter(x => x.month !== existing.month);
+  if (await commit(next, `Deleted the ${monthName(existing.month)} payslip.`)) closeDrawer(true);
+}
+
+/* --- Head form ----------------------------------------------------- */
+function headForm(existing = null) {
+  const h = existing ? clone(existing) : { name: "", kind: "finite" };
+  const u = existing ? usesOf(h.id) : { expenses: 0, balances: 0 }, used = u.expenses + u.balances;
+  const hasBal = existing && S.doc.statements.some(s => s.head === h.id);
+  const html = `${drawerHead(existing ? `Head: ${esc(h.name)}` : "New head")}
+    <div class="row2"><div class="field"><label for="fName">Name</label><input id="fName" name="name" value="${esc(h.name)}" autofocus></div>
+      <div class="field"><label for="fCode">Code (optional)</label><input id="fCode" name="code" value="${esc(h.code || "")}"></div></div>
+    <div class="field"><span class="lab">Kind</span><div class="seg">
+      <label><input type="radio" name="kind" value="finite" ${h.kind === "finite" ? "checked" : ""}>Has a budget</label>
+      <label><input type="radio" name="kind" value="open" ${h.kind === "open" ? "checked" : ""} ${hasBal ? "disabled" : ""}>Use-restricted, no limit</label></div>
+      <div class="hint">A budget has a balance that runs down. A use-restricted head has no limit but may only be used for one purpose.${hasBal ? " This head has balances from accounts, so it stays a budget." : ""}</div></div>
+    <div class="row2" id="finBox"><div class="field"><label for="fTotal">Total for the current period (optional)</label><input class="amt" id="fTotal" name="total" inputmode="decimal" value="${amtText(h.total)}" placeholder="₹"><div class="hint">What “% used” is measured against.</div></div>
+      <div class="field"><label for="fTill">Valid till (optional)</label><input type="date" id="fTill" name="validTill" value="${h.validTill || ""}"></div></div>
+    <div class="field"><label for="fUsed">Used for (optional)</label><input id="fUsed" name="usedFor" value="${esc(h.usedFor || "")}" placeholder="One line, shown under the head on the phone"></div>
+    ${existing ? `<div class="box">
+      ${h.closed
+        ? `<div class="note"><b>This head is closed.</b> It is hidden from the overview, the phone and the forms. Its entries are kept.</div>
+           <div><button class="ghost" type="button" data-act="reopenhead">Reopen it</button></div>`
+        : `<div class="note"><b>No longer using it?</b> Closing hides it from the overview, the phone and the forms, and keeps its history. Anything still owed to you on it still counts. You can reopen it any time.</div>
+           <div><button class="ghost" type="button" data-act="closehead">Close this head</button></div>`}
+      <div class="note">${used ? `Deleting removes it <b>and its ${[u.expenses && plural(u.expenses, "expense"), u.balances && plural(u.balances, "balance")].filter(Boolean).join(" and ")}</b>. Undo can bring them back.` : "Nothing uses this head, so it can simply be deleted."}</div>
+      <div><button class="danger" type="button" data-act="delete">${used ? "Delete with its entries" : "Delete"}</button></div>
+    </div>` : ""}
+    <div class="btnrow"><button class="primary" type="submit" value="save">Save <kbd>⌘↵</kbd></button></div>`;
+  openDrawer(html, () => saveHead(existing), el => {
+    const sync = () => ($("#finBox", el).hidden = el.elements.kind.value !== "finite");
+    el.addEventListener("change", sync); sync();
+  });
+}
+async function saveHead(existing) {
+  const el = form.el;
+  clearErrs(el);
+  const v = n => (el.elements[n]?.value ?? "").trim();
+  const h = { id: existing?.id, name: v("name"), kind: el.elements.kind.value };
+  if (existing?.closed) h.closed = true;
+  if (v("code")) h.code = v("code");
+  if (v("usedFor")) h.usedFor = v("usedFor");
+  if (!h.name) return fieldErr(el.elements.name, "Give the head a name.");
+  if (S.doc.heads.some(x => x.name.toLowerCase() === h.name.toLowerCase() && x.id !== h.id)) return fieldErr(el.elements.name, "Another head already has this name.");
+  if (h.kind === "finite") {
+    if (v("total")) { h.total = parseAmount(v("total")); if (h.total == null) return fieldErr(el.elements.total, "Enter an amount, or leave it empty."); }
+    if (v("validTill")) h.validTill = v("validTill");
+  }
+  if (!h.id) {
+    const base = h.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "head";
+    let id = base, n = 2;
+    while (S.doc.heads.some(x => x.id === id)) id = `${base}-${n++}`;
+    h.id = id;
+  }
+  const next = clone(S.doc);
+  next.heads = existing ? next.heads.map(x => (x.id === existing.id ? h : x)) : [...next.heads, h];
+  if (await commit(next, `${existing ? "Changed" : "Added"} the head “${h.name}”.`)) closeDrawer(true);
+}
+async function deleteHead(existing) {
+  const u = usesOf(existing.id);
+  const next = clone(S.doc);
+  next.heads = next.heads.filter(x => x.id !== existing.id);
+  next.expenses = next.expenses.filter(e => e.head !== existing.id);
+  next.statements = next.statements.filter(x => x.head !== existing.id);
+  const gone = [u.expenses && plural(u.expenses, "expense"), u.balances && plural(u.balances, "balance")].filter(Boolean).join(" and ");
+  if (await commit(next, `Deleted the head “${existing.name}”${gone ? ` and its ${gone}` : ""}.`)) closeDrawer(true);
+}
+async function setClosed(existing, closed) {
+  const next = clone(S.doc);
+  next.heads = next.heads.map(x => (x.id !== existing.id ? x : closed ? { ...x, closed: true } : (({ closed: _, ...rest }) => rest)(x)));
+  if (await commit(next, closed ? `Closed “${existing.name}”. Its entries are kept; reopen it from Heads.` : `Reopened “${existing.name}”.`)) closeDrawer(true);
+}
+
+/* ------------------------------------------------------------------ *
+ * Events
+ * ------------------------------------------------------------------ */
+function openNew(kind, preset = {}) {
+  if (!S.doc || (S.sample && !browsingSample)) return;
+  if (form) closeDrawer();
+  if (form) return;
+  ({ expense: () => expenseForm(null, preset), balance: () => balanceForm(null, preset), payslip: () => payslipForm(), head: () => headForm() })[kind]();
+}
+
+document.addEventListener("click", async ev => {
+  const t = ev.target;
+  const n = t.closest("[data-new]");
+  if (n) return openNew(n.dataset.new, n.dataset.head ? { head: n.dataset.head } : {});
+  const a = t.closest("[data-act]");
+  if (a) {
+    const act = a.dataset.act;
+    if (act === "close") return closeDrawer();
+    if (act === "undo") { $("#toast").hidden = true; return undo(); }
+    if (act === "browse") { browsingSample = true; return render(); }
+    if (act === "gostart") { browsingSample = false; return render(); }
+    if (act === "reveal") return store.reveal();
+    if (act === "keys") return toast("N new expense · B balance · P payslip · / search · 1–5 switch pages · ⌘Z undo · Esc close · ⌘↵ save");
+    if (act === "refresh") return store.refresh();
+    if (act === "signin") return store.signIn();
+    if (act === "signout") return store.signOut();
+    if ((act === "closehead" || act === "reopenhead") && form?.existing?.kind === "head") return setClosed(form.existing.h, act === "closehead");
+    if (act === "delete" && form) {
+      return armDelete(a, () => {
+        const ex = form.existing;
+        return ex.kind === "expense" ? deleteExpense(ex.id) : ex.kind === "balance" ? deleteBalance(ex.s) : ex.kind === "payslip" ? deletePayslip(ex.p) : deleteHead(ex.h);
+      });
+    }
+  }
+  const slip = t.closest("[data-openslip]");
+  if (slip) return store.openPayslip(slip.dataset.openslip);
+  const dec = t.closest("[data-decide]");
+  if (dec) {
+    let r;
+    try { r = await store.decide(dec.dataset.id, dec.dataset.decide); } catch { return; }
+    if (!r.ok) return toast(r.error, "crit");
+    adopt(r.state);
+    return toast(dec.dataset.decide === "apply" ? "The phone's version is in." : "The phone's change is set aside, in the backups folder.");
+  }
+  const quick = t.closest("[data-quick]");
+  if (quick) {
+    const e = S.doc.expenses.find(x => x.id === quick.dataset.id);
+    // A foreign-currency claim needs the rupee amount paid back. Where the row has no box for it, ask in the form.
+    if (quick.dataset.quick === "reimb" && estimated(e) && !$(`[data-fix="${CSS.escape(e.id)}"]`)) {
+      expenseForm(e);
+      track("expense", e);
+      const box = form.el.elements.hasReimbursed;
+      box.checked = true;
+      box.dispatchEvent(new Event("change", { bubbles: true }));
+      form.dirty = true;
+      form.el.elements.inrFixed.focus();
+      return;
+    }
+    return markDone(quick.dataset.quick, [e.id], TODAY);
+  }
+  const bulk = t.closest("[data-bulk]");
+  if (bulk) { const k = bulk.dataset.bulk; return markDone(k, [...ui.sel[k]], $(`[data-bulkdate="${k}"]`).value); }
+  const clr = t.closest("[data-clear]");
+  if (clr) { ui.sel[clr.dataset.clear].clear(); return render(); }
+  const sc = t.closest("[data-scroll]");
+  if (sc) return document.getElementById(sc.dataset.scroll)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const st = t.closest("[data-stage]");
+  if (st) { ui.stage = st.dataset.stage; return render(); }
+  const sf = t.closest("[data-salfy]");
+  if (sf) { ui.salFy = sf.dataset.salfy; return render(); }
+  if (t.closest("input, button, a, select, label")) return;
+  const row = t.closest("[data-edit]");
+  if (row) { const e = S.doc.expenses.find(x => x.id === row.dataset.edit); if (e) { expenseForm(e); track("expense", e); } return; }
+  const sr = t.closest("[data-editst]");
+  if (sr) { const [head, asOn] = sr.dataset.editst.split("|"); const s = S.doc.statements.find(x => x.head === head && x.asOn === asOn); balanceForm(s); track("statement", s); return; }
+  const pr = t.closest("[data-editslip]");
+  if (pr) { const p = S.doc.payslips.find(x => x.month === pr.dataset.editslip); payslipForm(p); track("payslip", p); return; }
+  const hr = t.closest("[data-edithead]");
+  if (hr) { const h = S.doc.heads.find(x => x.id === hr.dataset.edithead); headForm(h); track("head", h); return; }
+  const go = t.closest("[data-goto]");
+  if (go) { location.hash = go.dataset.goto; if (go.dataset.head) setTimeout(() => document.getElementById("bal-" + go.dataset.head)?.scrollIntoView({ block: "start" }), 30); }
+});
+
+document.addEventListener("change", ev => {
+  const t = ev.target;
+  if (t.dataset.pick) { const s = ui.sel[t.dataset.pick]; t.checked ? s.add(t.value) : s.delete(t.value); return rerenderKeepScroll(); }
+  if (t.dataset.all) { const k = t.dataset.all, s = ui.sel[k]; s.clear(); if (t.checked) for (const e of LISTS[k].rows()) s.add(e.id); return rerenderKeepScroll(); }
+  if (t.id === "fHead") { ui.head = t.value; $("#xbody").innerHTML = expenseTable(); }
+  if (t.id === "fFy") { ui.fy = t.value; $("#xbody").innerHTML = expenseTable(); }
+});
+document.addEventListener("input", ev => {
+  const t = ev.target;
+  if (t.id === "q") { ui.q = t.value; $("#xbody").innerHTML = expenseTable(); }
+  if (t.dataset.fix) ui.fixed[t.dataset.fix] = t.value;
+});
+document.addEventListener("submit", async ev => {
+  if (ev.target.id !== "startForm") return;
+  ev.preventDefault();
+  const heads = $$("input[name=h]:checked", ev.target).map(x => store.starter[Number(x.value)]);
+  let r;
+  try { r = await store.startReal(heads); } catch { return; }
+  if (!r.ok) return toast(r.error, "crit");
+  browsingSample = false;
+  undoStack.length = 0;
+  adopt(r.state);
+  toast("Your real budget is started. The phone shows it the next time it is opened.");
+});
+/* An entry opened in a form, as it was then: a save is refused if it has
+   since been changed somewhere else (the phone, another window). */
+function track(kind, x) {
+  const name = { statement: "balance" }[kind] || kind;
+  form.existing = { kind: name, ...(kind === "expense" ? { id: x.id } : kind === "statement" ? { s: x } : kind === "payslip" ? { p: x } : { h: x }) };
+  form.opened = { kind, key: entryKey(kind, x), entry: clone(x) };
+}
+function rerenderKeepScroll() { const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+$("#scrim").addEventListener("click", () => closeDrawer());
+document.addEventListener("keydown", ev => {
+  const typing = ev.target instanceof Element && ev.target.closest("input, textarea, select, [contenteditable]");
+  if (form) {
+    if (ev.key === "Escape") { ev.preventDefault(); closeDrawer(); }
+    if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); form.el.requestSubmit(form.el.querySelector("[type=submit][value=save]")); }
+    return;
+  }
+  if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "z" && !typing) { ev.preventDefault(); return undo(); }
+  if (typing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  const k = ev.key.toLowerCase();
+  if (k === "n") { ev.preventDefault(); openNew("expense"); }
+  else if (k === "b") { ev.preventDefault(); openNew("balance"); }
+  else if (k === "p") { ev.preventDefault(); openNew("payslip"); }
+  else if (k === "/") { ev.preventDefault(); location.hash = "expenses"; setTimeout(() => $("#q")?.focus(), 30); }
+  else if ("12345".includes(k) && k) location.hash = VIEWS[Number(k) - 1];
+});
+
+function route() {
+  const v = location.hash.slice(1);
+  ui.view = VIEWS.includes(v) ? v : "overview";
+  if (S.doc) { render(); window.scrollTo(0, 0); }
+}
+window.addEventListener("hashchange", route);
+
+ui.view = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "overview";
+for (const el of $$("[data-only]")) el.hidden = el.dataset.only !== store.kind;
+$("#where").textContent = PHONE ? "On this phone" : "Entries, on this laptop";
+store.start(pageApi);
 </script>
-
 </body>
 </html>
