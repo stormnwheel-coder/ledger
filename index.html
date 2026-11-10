@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1kFiadwLfo8407m9qvkq8X4uOD6RUKSvN9b3K9U7Gw4='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RLHAcMoPEPZm5hgrcquF1I55NT7WrHhOfPCuSO1R3/c='; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://api.dropboxapi.com https://content.dropboxapi.com; base-uri 'none'; object-src 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
@@ -90,7 +90,7 @@ input.amt { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Cards, tiles, meters, flags. */
 .card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; }
-.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .tile { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; cursor: pointer; text-align: left; }
 .tile:hover { border-color: var(--rule-2); }
 .tile .k { font-size: 12.5px; color: var(--ink-2); font-weight: 560; }
@@ -234,7 +234,7 @@ details.working summary { cursor: pointer; color: var(--accent); font-weight: 60
 @keyframes spin { to { transform: rotate(360deg); } }
 .ph { display: none; }
 @media (hover: none) { .t tr .hov { visibility: visible; } kbd { display: none; } }
-@media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .side { position: static; height: auto; } .tiles { grid-template-columns: 1fr 1fr; } main { padding: 18px 16px 60px; } }
+@media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .side { position: static; height: auto; } .tiles { grid-template-columns: 1fr 1fr; } .tile.hero { grid-column: 1 / -1; } main { padding: 18px 16px 60px; } }
 
 /* Small screens (the phone): one column, the pages as tabs along the bottom,
    + Expense floating above them, and each table row stacked as a block. */
@@ -329,8 +329,8 @@ import {
   IN0, IN2, rs, bare, sum, rupees, estimated, approx, chargedOn, byDate, stage, standing, esc,
   problems, RE_DATE, RE_MONTH, gross, net, ofKind, creditGap, buildModel,
   diffDocs, applyChanges, invert, entryKey, findEntry, sameEntry,
-} from "./model.js?v=Ok7HKjjFO";
-import { store } from "./store.js?v=Ok7HKjjFO";
+} from "./model.js?v=7supA1GtQh";
+import { store } from "./store.js?v=7supA1GtQh";
 
 const PHONE = store.kind === "phone";
 
@@ -373,7 +373,7 @@ let connectInfo = null; // the phone, not signed in or with nothing read yet: wh
 const undoStack = []; // the changes each save made, newest last
 const ui = {
   view: "overview", q: "", head: "all", stage: "all", fy: "all", salFy: null,
-  sel: { claim: new Set(), reimb: new Set(), charge: new Set() }, fixed: {},
+  sel: { submit: new Set(), claim: new Set(), reimb: new Set(), charge: new Set() }, fixed: {},
   last: { head: null, paidBy: "me", purpose: {} },
 };
 
@@ -550,7 +550,7 @@ function gettingStarted() {
   const steps = [
     [!noBal.length, `Enter the latest balance from accounts for each budget head${noBal.length ? ` (${noBal.length} of ${finite.length} still to do)` : ""}.`,
       noBal.length ? `<div class="chips">${noBal.map(h => `<button class="chip" type="button" data-new="balance" data-head="${esc(h.id)}">+ ${esc(h.name)}</button>`).join("")}</div>` : ""],
-    [S.doc.expenses.length > 0, "Enter the expenses that are not in those balances yet: claims you are waiting on, things not claimed yet, and institute bookings not yet charged. Older, settled ones are optional, for the record.",
+    [S.doc.expenses.length > 0, "Enter the expenses that are not in those balances yet: claims you are waiting on, things with the secretary or not yet submitted, and institute bookings not yet charged. Older, settled ones are optional, for the record.",
       `<div class="chips"><button class="chip" type="button" data-new="expense">+ Expense</button></div>`],
     [S.doc.payslips.length > 0, "Add your latest payslip.", `<div class="chips"><button class="chip" type="button" data-new="payslip">+ Payslip</button></div>`],
   ];
@@ -560,8 +560,10 @@ function gettingStarted() {
 }
 
 const LISTS = {
-  claim: { title: "Claim these", sub: "You paid, and have not claimed yet", field: "claimed", verb: "Mark claimed", done: "claimed",
-    rows: () => M.unclaimed, when: e => `paid ${ago(e.date)}`, empty: "Nothing to claim." },
+  submit: { title: "Submit to the secretary", sub: "You paid, and have not submitted them yet", field: "submitted", verb: "Mark submitted", done: "submitted",
+    rows: () => M.toSubmit, when: e => `paid ${ago(e.date)}`, empty: "Nothing to submit." },
+  claim: { title: "With the secretary", sub: "Submitted, not claimed yet. Oldest first.", field: "claimed", verb: "Mark claimed", done: "claimed",
+    rows: () => M.submitted, when: e => `submitted ${e.submitted === TODAY ? "today" : `${dShort(e.submitted)}, ${ago(e.submitted)}`}`, empty: "Nothing with the secretary." },
   reimb: { title: "Waiting to be reimbursed", sub: "Claimed, not paid back yet. Oldest claim first.", field: "reimbursed", verb: "Mark reimbursed", done: "reimbursed",
     rows: () => M.claimed, when: e => (e.claimed === TODAY ? "claimed today" : `claimed ${dShort(e.claimed)}, waiting ${days(daysBetween(e.claimed, TODAY))}`), empty: "Nothing waiting." },
   charge: { title: "Institute bookings not charged yet", sub: "Booked through the institute, not yet charged to the head", field: "charged", verb: "Mark charged", done: "charged",
@@ -619,11 +621,13 @@ function headCard(f) {
 
 function overviewView() {
   const owed = sum(M.mine, rupees), p = M.latest;
-  const oldest = M.claimed[0];
+  const oldest = M.claimed[0], withSec = M.submitted[0];
+  const part = xs => approx(sum(xs, rupees), xs.some(estimated));
   const tiles = `<div class="tiles">
-    <button class="tile hero" type="button" data-scroll="list-claim"><div class="k">Owed to you</div><div class="v">${approx(owed, M.mine.some(estimated))}</div>
-      <div class="s">${rs(sum(M.claimed, rupees))} claimed · ${approx(sum(M.unclaimed, rupees), M.unclaimed.some(estimated))} not claimed</div></button>
-    <button class="tile" type="button" data-scroll="list-claim"><div class="k">To claim</div><div class="v">${M.unclaimed.length}</div><div class="s">${M.unclaimed.length ? `oldest paid ${ago(M.unclaimed[0].date)}` : "all claimed"}</div></button>
+    <button class="tile hero" type="button" data-scroll="list-submit"><div class="k">Owed to you</div><div class="v">${approx(owed, M.mine.some(estimated))}</div>
+      <div class="s">${part(M.claimed)} claimed · ${part(M.submitted)} with the secretary · ${part(M.toSubmit)} not submitted</div></button>
+    <button class="tile" type="button" data-scroll="list-submit"><div class="k">To submit</div><div class="v">${M.toSubmit.length}</div><div class="s">${M.toSubmit.length ? `oldest paid ${ago(M.toSubmit[0].date)}` : "all submitted"}</div></button>
+    <button class="tile" type="button" data-scroll="list-claim"><div class="k">With the secretary</div><div class="v">${M.submitted.length}</div><div class="s">${!withSec ? "none" : withSec.submitted === TODAY ? "submitted today" : `longest ${days(daysBetween(withSec.submitted, TODAY))}`}</div></button>
     <button class="tile" type="button" data-scroll="list-reimb"><div class="k">Waiting for reimbursement</div><div class="v">${M.claimed.length}</div><div class="s">${!oldest ? "none waiting" : oldest.claimed === TODAY ? "claimed today" : `longest ${days(daysBetween(oldest.claimed, TODAY))}`}</div></button>
     <button class="tile" type="button" data-scroll="list-charge"><div class="k">Bookings not charged</div><div class="v">${uncharged().length}</div><div class="s">${approx(sum(uncharged(), rupees), uncharged().some(estimated))}</div></button>
   </div>`;
@@ -636,7 +640,7 @@ function overviewView() {
   return `${pageHead("Overview", dFull(TODAY) + ` · FY ${fyLabel(TODAY)}`)}
     ${heldCard()}${gettingStarted()}${tiles}
     <h2 class="sec">Needs action <span>tick several to mark them together</span></h2>
-    <div class="stack">${actCard("claim")}${actCard("reimb")}${actCard("charge")}</div>
+    <div class="stack">${actCard("submit")}${actCard("claim")}${actCard("reimb")}${actCard("charge")}</div>
     <h2 class="sec">Budgets <span>available now · <a class="link" href="#heads">add or close heads</a></span></h2>
     <div class="grid">${finite.map(headCard).join("") || `<div class="note">No budget heads.</div>`}</div>
     <h2 class="sec">Use-restricted <span>FY ${fyLabel(TODAY)}</span></h2>
@@ -647,7 +651,7 @@ function overviewView() {
 /* --- Expenses ------------------------------------------------------ */
 function expensesView() {
   const fys = [...new Set(S.doc.expenses.map(e => fyStart(e.date)))].sort().reverse();
-  const stages = [["all", "All"], ["toclaim", "To claim"], ["waiting", "Waiting"], ["settled", "Settled"]];
+  const stages = [["all", "All"], ["toclaim", "To submit"], ["submitted", "With the secretary"], ["waiting", "Waiting"], ["settled", "Settled"]];
   return `${pageHead("Expenses", "Click any row to change it.", `<button class="primary" type="button" data-new="expense">+ Expense</button>`)}
     <div class="toolbar">
       <input type="search" id="q" placeholder="Search item, purpose, amount…  ( / )" value="${esc(ui.q)}">
@@ -676,7 +680,9 @@ function expenseTable() {
     const head = m !== month ? `<tr class="mon"><td colspan="6">${monthName(m)}</td></tr>` : "";
     month = m;
     const [kind, words] = standing(e, TODAY);
-    const quick = stage(e) === "toclaim" ? ["claim", "Claimed today"] : stage(e) === "waiting" ? (e.paidBy === "me" ? ["reimb", "Reimbursed today"] : ["charge", "Charged today"]) : null;
+    const st = stage(e);
+    const quick = st === "toclaim" ? ["submit", "Submitted today"] : st === "submitted" ? ["claim", "Claimed today"]
+      : st === "waiting" ? (e.paidBy === "me" ? ["reimb", "Reimbursed today"] : ["charge", "Charged today"]) : null;
     const sub = [e.purpose && esc(e.purpose), e.foreign && `${esc(e.foreign.currency)} ${IN2.format(e.foreign.amount)} at ₹${IN2.format(e.foreign.rate)}`].filter(Boolean).join(" · ");
     return `${head}<tr data-edit="${esc(e.id)}">
       <td class="nowrap dt">${dShort(e.date)}</td><td class="nowrap dt">${esc(headName(e.head))}</td>
@@ -831,6 +837,7 @@ function expenseForm(existing = null, preset = {}) {
     <div class="field"><span class="lab">Who paid</span><div class="seg"><label><input type="radio" name="paidBy" value="me" ${e.paidBy === "me" ? "checked" : ""}>I paid</label><label><input type="radio" name="paidBy" value="institute" ${e.paidBy === "institute" ? "checked" : ""}>The institute paid</label></div></div>
     <div class="field"><span class="lab">Where it stands</span>
       <div class="progress" id="mineBox">
+        <label class="check"><input type="checkbox" name="hasSubmitted" ${e.submitted ? "checked" : ""}>Submitted to the secretary</label><input type="date" name="submitted" value="${e.submitted || ""}" max="${TODAY}" ${e.submitted ? "" : "disabled"}>
         <label class="check"><input type="checkbox" name="hasClaimed" ${e.claimed ? "checked" : ""}>Claimed</label><input type="date" name="claimed" value="${e.claimed || ""}" max="${TODAY}" ${e.claimed ? "" : "disabled"}>
         <label class="check"><input type="checkbox" name="hasReimbursed" ${e.reimbursed ? "checked" : ""}>Reimbursed</label><input type="date" name="reimbursed" value="${e.reimbursed || ""}" max="${TODAY}" ${e.reimbursed ? "" : "disabled"}>
       </div>
@@ -856,7 +863,7 @@ function expenseForm(existing = null, preset = {}) {
       $("#inrBox", el).hidden = fxOn; $("#fxBox", el).hidden = !fxOn;
       const mine = el.elements.paidBy.value === "me";
       $("#mineBox", el).hidden = !mine; $("#instBox", el).hidden = mine;
-      for (const k of ["claimed", "reimbursed", "charged"]) {
+      for (const k of ["submitted", "claimed", "reimbursed", "charged"]) {
         const box = el.elements["has" + k[0].toUpperCase() + k.slice(1)], d = el.elements[k];
         d.disabled = !box.checked;
         if (box.checked && !d.value) d.value = TODAY;
@@ -908,8 +915,10 @@ function readExpense(el, existing, quiet = false) {
     if (v("inrFixed") && e.inr == null) errs.push(["inrFixed", "Enter a rupee amount, or leave it empty."]);
   }
   const stamp = k => { if (el.elements["has" + k[0].toUpperCase() + k.slice(1)].checked) { e[k] = v(k); if (!RE_DATE.test(e[k])) errs.push([k, "Enter the date."]); } };
-  if (e.paidBy === "me") { stamp("claimed"); stamp("reimbursed"); } else stamp("charged");
+  if (e.paidBy === "me") { stamp("submitted"); stamp("claimed"); stamp("reimbursed"); } else stamp("charged");
+  if (e.submitted && e.submitted < e.date) errs.push(["submitted", "The submission is dated before the expense."]);
   if (e.claimed && e.claimed < e.date) errs.push(["claimed", "The claim is dated before the expense."]);
+  else if (e.claimed && e.submitted && e.claimed < e.submitted) errs.push(["claimed", "Claimed before it was submitted to the secretary?"]);
   if (e.reimbursed && e.claimed && e.reimbursed < e.claimed) errs.push(["reimbursed", "Reimbursed before it was claimed?"]);
   if (e.reimbursed && e.foreign && e.inr == null) errs.push(["inrFixed", "Enter the rupee amount paid back: it is fixed once reimbursed."]);
   if (quiet) return { e: errs.some(([k]) => ["head", "inr", "famount", "rate", "currency"].includes(k)) ? null : e };
@@ -955,7 +964,7 @@ async function deleteExpense(id) {
   if (await commit(next, `Deleted “${e.item}”.`)) closeDrawer(true);
 }
 
-/* --- Marking claimed, reimbursed or charged, one or many ------------ */
+/* --- Marking submitted, claimed, reimbursed or charged, one or many - */
 async function markDone(key, ids, date) {
   const L = LISTS[key];
   if (!RE_DATE.test(date || "")) return toast("Choose the date first.", "crit");
@@ -967,7 +976,9 @@ async function markDone(key, ids, date) {
       if (v == null) { toast(`Enter the rupee amount paid back for “${e.item}” first.`, "crit"); $(`[data-fix="${CSS.escape(id)}"]`)?.focus(); return; }
       e.inr = v;
     }
+    if (key === "submit" && date < e.date) return toast(`“${e.item}” is dated ${dShort(e.date)}, after that submission date.`, "crit");
     if (key === "claim" && date < e.date) return toast(`“${e.item}” is dated ${dShort(e.date)}, after that claim date.`, "crit");
+    if (key === "claim" && e.submitted && date < e.submitted) return toast(`“${e.item}” was submitted on ${dShort(e.submitted)}, after that claim date.`, "crit");
     if (key === "reimb" && e.claimed && date < e.claimed) return toast(`“${e.item}” was claimed on ${dShort(e.claimed)}, after that date.`, "crit");
     e[L.field] = date;
   }

@@ -60,17 +60,21 @@ export const approx = (n, est) => (est ? "≈ " : "") + rs(n);
 export const chargedOn = e => (e.paidBy === "me" ? e.reimbursed : e.charged) || null;
 export const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 /* Where an expense stands: settled (reimbursed or charged), waiting (claimed,
-   or booked by the institute and not yet charged) or toclaim (you paid and
-   have not claimed). */
+   or booked by the institute and not yet charged), submitted (you paid and
+   gave it to the secretary, who has not claimed it yet) or toclaim (you paid
+   and have done neither). An expense you paid goes date → submitted to the
+   secretary → claimed → reimbursed; "submitted" may be missing, for a claim
+   made without the secretary or entered before the stage existed. */
 export const stage = e => (e.paidBy === "me"
-  ? (e.reimbursed ? "settled" : e.claimed ? "waiting" : "toclaim")
+  ? (e.reimbursed ? "settled" : e.claimed ? "waiting" : e.submitted ? "submitted" : "toclaim")
   : (e.charged ? "settled" : "waiting"));
 /* The same, in words, as [icon kind, text]. Icon kinds: good, wait, todo. */
 export function standing(e, today) {
   if (e.paidBy === "me") {
     if (e.reimbursed) return ["good", `Reimbursed ${dShort(e.reimbursed)}`];
     if (e.claimed) return ["wait", `Claimed ${dShort(e.claimed)}, waiting ${days(daysBetween(e.claimed, today))}`];
-    return ["todo", "Not claimed yet"];
+    if (e.submitted) return ["wait", `With the secretary since ${dShort(e.submitted)}`];
+    return ["todo", "Not submitted yet"];
   }
   return e.charged ? ["good", `Charged ${dShort(e.charged)}`] : ["wait", "Not charged yet"];
 }
@@ -90,7 +94,7 @@ export const FIELDS = {
   file: ["version", "sample", "_note", "heads", "statements", "expenses", "payslips", "fromPhone"],
   head: ["id", "name", "code", "kind", "total", "validTill", "usedFor", "closed"],
   statement: ["head", "asOn", "balance", "source"],
-  expense: ["id", "head", "date", "item", "purpose", "paidBy", "inr", "foreign", "claimed", "reimbursed", "charged"],
+  expense: ["id", "head", "date", "item", "purpose", "paidBy", "inr", "foreign", "submitted", "claimed", "reimbursed", "charged"],
   foreign: ["currency", "amount", "rate"],
   payslip: ["month", "earnings", "deductions", "credited", "file"],
   earning: ["label", "amount"],
@@ -166,9 +170,9 @@ export function problems(d) {
       }
     }
     if (e.inr == null && e.foreign == null) bad.push(`${at}: no rupee amount and no foreign amount`);
-    for (const k of ["claimed", "reimbursed", "charged"]) if (!optDate(e[k])) bad.push(`${at}: ${k} must be a date`);
+    for (const k of ["submitted", "claimed", "reimbursed", "charged"]) if (!optDate(e[k])) bad.push(`${at}: ${k} must be a date`);
     if (e.paidBy === "me" && e.charged != null) bad.push(`${at}: "charged" is for institute bookings`);
-    if (e.paidBy === "institute" && (e.claimed != null || e.reimbursed != null)) bad.push(`${at}: "claimed" and "reimbursed" are for expenses you paid`);
+    if (e.paidBy === "institute" && (e.submitted != null || e.claimed != null || e.reimbursed != null)) bad.push(`${at}: "submitted", "claimed" and "reimbursed" are for expenses you paid`);
   });
 
   const seenMonth = new Set();
@@ -454,14 +458,20 @@ export function buildModel(d, today) {
   const active = heads.filter(x => !x.h.closed);
   const headName = Object.fromEntries(d.heads.map(h => [h.id, h.name]));
 
+  // Owed to you: what you paid and have not been paid back for, in three
+  // parts. claimed: claimed, waiting, oldest claim first. submitted: with the
+  // secretary, not claimed yet, oldest first. toSubmit: neither yet, oldest
+  // expense first. unclaimed is the last two together.
   const mine = d.expenses.filter(e => e.paidBy === "me" && !e.reimbursed);
   const claimed = mine.filter(e => e.claimed).sort((a, b) => (a.claimed < b.claimed ? -1 : 1));
   const unclaimed = mine.filter(e => !e.claimed).sort(byDate);
+  const submitted = unclaimed.filter(e => e.submitted).sort((a, b) => (a.submitted < b.submitted ? -1 : a.submitted > b.submitted ? 1 : byDate(a, b)));
+  const toSubmit = unclaimed.filter(e => !e.submitted);
 
   const slips = [...d.payslips].sort((a, b) => (a.month < b.month ? -1 : 1));
   const fySlips = slips.filter(p => p.month >= fy0.slice(0, 7));
   const short = fySlips.filter(p => p.credited && creditGap(p) !== 0);
 
-  return { d, today, fy0, heads, active, headName, mine, claimed, unclaimed, slips, fySlips, short,
+  return { d, today, fy0, heads, active, headName, mine, claimed, unclaimed, submitted, toSubmit, slips, fySlips, short,
     latest: slips.at(-1) || null };
 }

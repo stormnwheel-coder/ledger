@@ -20,7 +20,7 @@
  * good copy of everything read is kept too, so the app opens at once and
  * offline; every open checks Dropbox for something newer.
  */
-import { localYmd, pad, dLong, diffDocs, foldChanges, changeProblems, validate, sameEntry, findEntry, RE_MONTH } from "./model.js?v=Ok7HKjjFO";
+import { localYmd, pad, dLong, diffDocs, foldChanges, changeProblems, validate, sameEntry, findEntry, RE_MONTH } from "./model.js?v=7supA1GtQh";
 
 const CFG = JSON.parse(document.getElementById("config").textContent);
 const DIR = CFG.file.replace(/[^/]*$/, "");
